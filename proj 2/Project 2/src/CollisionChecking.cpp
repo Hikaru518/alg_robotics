@@ -25,27 +25,6 @@ bool isValidPoint(double x, double y, const std::vector<Rectangle>& obstacles)
     	{
     	    return false;
     	}
-    // 	if( x>=a )
-    // 	{
-    // 		//std::cout << "x>=a"<<std::endl;
-    // 		if (x <= (a+width)) 
-    // 		{
-    // // 			std::cout << "x<=a++++++"<<std::endl;
-    // // 			std::cout << "Obstacles #: " << i <<std::endl;
-    // // 			std::cout << "b = " << b <<std::endl;
-    // //             std::cout << "x = " << x <<std::endl;
-				// // std::cout << "y = " << y <<std::endl;
-    // 			if (y >=b)
-    // 			{
-    // 				//std::cout << "x>=b"<<std::endl;
-    // 				if (y<=(b+height))
-    // 				{
-    // 					//std::cout << "x<=b++++++"<<std::endl;
-    // 				}
-    // 			}
-
-    // 		}
-    // 	}
     }
     return true;
 }
@@ -53,9 +32,22 @@ bool isValidPoint(double x, double y, const std::vector<Rectangle>& obstacles)
 // Intersect a circle with center (x,y) and given radius with the set of
 // rectangles. If the circle lies outside of all obstacles, return true.
 bool isValidCircle(double x, double y, double radius, const std::vector<Rectangle>& obstacles)
-{
-    // TODO: IMPLEMENT ME!!
+{double i=0;
+ double a,b,w,h;
+ double N=obstacles.size();
+ for(i=0;i<N;i++)
+ {
+   a=obstacles[i].x;
+   b=obstacles[i].y;
+   w=obstacles[i].width;
+   h=obstacles[i].height;   
+   if ((x>=a-radius && x<=a+w+radius && y>=b && y<=b+h) || (x>=a && x<=a+w && y>=b-radius && y<=b+h+radius) || (x-a)^2+(y-b)^2<=radius^2 || (x-a)^2+(y-b-h)^2<=radius^2 || (x-a-w)^2+(y-b)^2<=radius^2 || (x-a-w)^2+(y-b-h)^2<=radius^2)
+   {
     return false;
+   }
+ }
+    // TODO: IMPLEMENT ME!!
+    return true;
 }
 
 // Intersect a square with center at (x,y), orientation theta, and the given
