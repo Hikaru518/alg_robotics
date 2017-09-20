@@ -6,6 +6,7 @@
 //////////////////////////////////////
 
 #include "CollisionChecking.h"
+#include "Transformation.h"
 
 // Intersect the point (x,y) with the set of rectangles. If the point lies
 // outside of all obstacles, return true.
@@ -69,25 +70,29 @@ bool isValidSquare(double x, double y, double theta, double sideLength, const st
   // transformed corner points of square
   double tSquareP1_x,tSquareP1_y,tSquareP2_x,tSquareP2_y,tSquareP3_x,tSquareP3_y,tSquareP4_x,tSquareP4_y;
 
-  squareP1_x = 0.5*sideLength*(sin(theta)+cos(theta)) + x;
-  squareP1_y = 0.5*sideLength*(sin(theta)-cos(theta)) + y;
+  squareP1_x = getRotatedPoint_X(x+0.5*sideLength,y-0.5*sideLength,x,y,theta);
+  squareP1_y = getRotatedPoint_Y(x+0.5*sideLength,y-0.5*sideLength,x,y,theta);
 
-  squareP2_x = 0.5*sideLength*(-sin(theta)+cos(theta)) + x;
-  squareP2_y = 0.5*sideLength*(sin(theta)+cos(theta)) + y;
+  squareP2_x = getRotatedPoint_X(x+0.5*sideLength,y+0.5*sideLength,x,y,theta);
+  squareP2_y = getRotatedPoint_Y(x+0.5*sideLength,y+0.5*sideLength,x,y,theta);
 
-  squareP3_x = 0.5*sideLength*(-sin(theta)-cos(theta)) + x;
-  squareP3_y = 0.5*sideLength*(-sin(theta)+cos(theta)) + y;
+  squareP3_x = getRotatedPoint_X(x-0.5*sideLength,y+0.5*sideLength,x,y,theta);
+  squareP3_y = getRotatedPoint_Y(x-0.5*sideLength,y+0.5*sideLength,x,y,theta);
 
-  squareP4_x = 0.5*sideLength*(sin(theta)-cos(theta)) + x;
-  squareP4_y = 0.5*sideLength*(-sin(theta)-cos(theta)) + y;
+  squareP4_x = getRotatedPoint_X(x-0.5*sideLength,y-0.5*sideLength,x,y,theta);
+  squareP4_y = getRotatedPoint_Y(x-0.5*sideLength,y-0.5*sideLength,x,y,theta);
 
+  /* DEBUG print points of square */
+  //std::cout << "x = " << squareP1_x << " "<< squareP2_x<< " " << squareP3_x<< " " << squareP4_x << std::endl;
+  //std::cout << "y = " << squareP1_y << " "<< squareP2_y<< " " << squareP3_y<< " " << squareP4_y << std::endl;
   // case 1: object's corners in obstacles
   if(!(isValidPoint(squareP1_x,squareP1_y,obstacles) &&
         isValidPoint(squareP2_x,squareP2_y,obstacles) &&
         isValidPoint(squareP3_x,squareP3_y,obstacles) &&
         isValidPoint(squareP4_x,squareP4_y,obstacles)))
   {
-    std::cout<< "stops at case 1" << std::endl;
+    // DEBUG
+    // std::cout<< "stops at case 1" << std::endl;
     return false;
   }
 
@@ -119,32 +124,38 @@ bool isValidSquare(double x, double y, double theta, double sideLength, const st
     obstacleP3_x = obstacles[i].x + obstacles[i].width; obstacleP3_y = obstacles[i].y + obstacles[i].height;
     obstacleP4_x = obstacles[i].x; obstacleP4_y = obstacles[i].y + obstacles[i].height;
 
-    tObstacleP1_x = obstacleP1_x*cos(theta) + obstacleP1_y*sin(theta);
-    tObstacleP1_y = -obstacleP1_x*sin(theta) + obstacleP1_y*cos(theta);
+    tObstacleP1_x = getRotatedPoint_X(obstacleP1_x,obstacleP1_y,x,y,-theta);
+    tObstacleP1_y = getRotatedPoint_Y(obstacleP1_x,obstacleP1_y,x,y,-theta);
 
-    tObstacleP2_x = obstacleP2_x*cos(theta) + obstacleP2_y*sin(theta);
-    tObstacleP2_y = -obstacleP2_x*sin(theta) + obstacleP2_y*cos(theta);
+    tObstacleP2_x = getRotatedPoint_X(obstacleP2_x,obstacleP2_y,x,y,-theta);
+    tObstacleP2_y = getRotatedPoint_Y(obstacleP2_x,obstacleP2_y,x,y,-theta);
 
-    tObstacleP3_x = obstacleP3_x*cos(theta) + obstacleP3_y*sin(theta);
-    tObstacleP3_y = -obstacleP3_x*sin(theta) + obstacleP3_y*cos(theta);
+    tObstacleP3_x = getRotatedPoint_X(obstacleP3_x,obstacleP3_y,x,y,-theta);
+    tObstacleP3_y = getRotatedPoint_Y(obstacleP3_x,obstacleP3_y,x,y,-theta);
 
-    tObstacleP4_x = obstacleP4_x*cos(theta) + obstacleP4_y*sin(theta);
-    tObstacleP4_y = -obstacleP4_x*sin(theta) + obstacleP4_y*cos(theta);
+    tObstacleP4_x = getRotatedPoint_X(obstacleP4_x,obstacleP4_y,x,y,-theta);
+    tObstacleP4_y = getRotatedPoint_Y(obstacleP4_x,obstacleP4_y,x,y,-theta);
+
     // judge whether transformed corner points of obstacles are in transformed square
-
-    if(isValidPoint(tObstacleP1_x,tObstacleP1_y,tSquareVector)){
-        std::cout << "x1,y1" <<std::endl;
-    }
-
     if(!(isValidPoint(tObstacleP1_x,tObstacleP1_y,tSquareVector) &&
         isValidPoint(tObstacleP2_x, tObstacleP2_y,tSquareVector) &&
         isValidPoint(tObstacleP3_x, tObstacleP3_y,tSquareVector) &&
-        isValidPoint(tObstacleP4_y, tObstacleP4_y,tSquareVector))
+        isValidPoint(tObstacleP4_x, tObstacleP4_y,tSquareVector))
       )
     {
+      std::cout << "theta = "<< theta<<std::endl; 
+      std::cout << "x = " << tObstacleP1_x << ' '<< tObstacleP2_x << ' ' << tObstacleP3_x << ' ' << tObstacleP4_x << " "<< tObstacleP1_x << std::endl;
+      std::cout << "y = " << tObstacleP1_y << ' '<< tObstacleP2_y << ' ' << tObstacleP3_y << ' ' << tObstacleP4_y << " "<< tObstacleP1_y << std::endl;
+
+      std::cout << "tSquare info:" << std::endl;
+      std::cout << "x = " << tSquareP1_x << ' '<< tSquareP2_x << ' ' << tSquareP3_x << ' ' << tSquareP4_x << " "<< tSquareP1_x << std::endl;
+      std::cout << "y = " << tSquareP1_y << ' '<< tSquareP2_y << ' ' << tSquareP3_y << ' ' << tSquareP4_y << " "<< tSquareP1_y << std::endl;
+
+      std::cout << "i = " << i << std::endl;
       return false;
     }
   }
+  tSquareVector.pop_back();
   return true;
 }
 
