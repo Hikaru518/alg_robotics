@@ -20,6 +20,7 @@ bool isValidPoint(double x, double y, const std::vector<Rectangle>& obstacles)
     double b = obstacles[i].y;
     double width = obstacles[i].width;
     double height = obstacles[i].height;
+    
     // Check whether the point robot is in collision with the obstacles.
     // If the point satisfies following conditions, it means it is in collision:
     // a<=x<=a+width and b<=y<=b+height.
@@ -175,16 +176,6 @@ bool isValidSquare(double x, double y, double theta, double sideLength, const st
         isValidPoint(tObstacleP4_x, tObstacleP4_y,tSquareVector))
       )
     {
-      /* DEBUG check every mistake point */ 
-      //std::cout << "theta = "<< theta<<std::endl; 
-      //std::cout << "x = " << tObstacleP1_x << ' '<< tObstacleP2_x << ' ' << tObstacleP3_x << ' ' << tObstacleP4_x << " "<< tObstacleP1_x << std::endl;
-      //std::cout << "y = " << tObstacleP1_y << ' '<< tObstacleP2_y << ' ' << tObstacleP3_y << ' ' << tObstacleP4_y << " "<< tObstacleP1_y << std::endl;
-
-      //std::cout << "tSquare info:" << std::endl;
-      //std::cout << "x = " << tSquareP1_x << ' '<< tSquareP2_x << ' ' << tSquareP3_x << ' ' << tSquareP4_x << " "<< tSquareP1_x << std::endl;
-      //std::cout << "y = " << tSquareP1_y << ' '<< tSquareP2_y << ' ' << tSquareP3_y << ' ' << tSquareP4_y << " "<< tSquareP1_y << std::endl;
-
-      //std::cout << "i = " << i << std::endl;
       return false;
     }
   }

@@ -2,8 +2,11 @@ MECH 550
 GUIDE TO PROJECT 2
 PEIGUANG WANG, SICHAO ZHANG
 
-WHAT HAVE WE DONE?
--Implement all the 3 functions.
--Write a function named transformation.h to solve the rotation problem in Problem 3.
- 
--We use MATLAB to
+HOW TO RUN THE FILE
+In terminal, under Project 2 dir, type:
+$ make
+$ ./Project2 /path/of/cases.txt
+
+ADDITIONAL FILES:
+Visualization: Directory. Visualization of the robot and obstacles for debugging. Written in MATLAB.
+CollisionChecking.h/CollisionChecking.cpp: Additional functions for transformations for objects/obstacles. 
