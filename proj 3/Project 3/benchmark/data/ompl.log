@@ -1,0 +1,451 @@
+OMPL version 1.3.1
+Experiment cubicles_gaussian_sampler
+0 experiment properties
+Running on ompl
+Starting at 2017-10-02 22:44:40
+<<<|
+Properties of the state space 'SE3CompoundSpace0'
+  - signature: 6 5 6 1 3 3 3 
+  - dimension: 6
+  - extent: 1149.42
+  - sanity checks for state space passed
+  - probability of valid states: 0.461
+  - average length of a valid motion: 141.309
+  - average number of samples drawn per second: sampleUniform()=3.4529e+06 sampleUniformNear()=2.89995e+06 sampleGaussian()=1.3942e+06
+Settings for the state space 'SE3CompoundSpace0'
+  - state validity check resolution: 1%
+  - valid segment count factor: 1
+  - state space:
+Compound state space 'SE3CompoundSpace0' of dimension 6 (locked) [
+Real vector state space 'RealVectorSpace1' of dimension 3 with bounds: 
+  - min: -508.882 -230.129 -123.75 
+  - max: 319.618 531.871 101 
+ of weight 1
+SO(3) state space 'SO3Space2' (represented using quaternions)
+ of weight 1
+]
+Registered projections:
+  - <default>
+Projection of dimension 3
+Cell sizes (set by user): [35 35 35]
+
+Declared parameters:
+longest_valid_segment_fraction = 0.01
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+valid_segment_count_factor = 1
+Valid state sampler named gaussian with parameters:
+nr_attempts = 100
+standard_deviation = 114.94248197151306
+Planner LBKPIECE1 specs:
+Multithreaded:                 No
+Reports approximate solutions: No
+Can optimize solutions:        No
+Aware of the following parameters: border_fraction min_valid_path_fraction range
+Declared parameters for planner LBKPIECE1:
+border_fraction = 0.90000000000000002
+min_valid_path_fraction = 0.5
+range = 229.88496394302612
+Start states:
+Compound state [
+RealVectorState [-4.96 -40.62 70.57]
+SO3State [0 0 0 1]
+]
+Goal state, threshold = 2.22045e-16, memory address = 0x55e3746a8fa0, state = 
+Compound state [
+RealVectorState [200.49 -40.62 70.57]
+SO3State [0 0 0 1]
+]
+OptimizationObjective = nullptr
+There are 0 solutions
+
+Properties of benchmarked planners:
+Planner RRTConnect specs:
+Multithreaded:                 No
+Reports approximate solutions: No
+Can optimize solutions:        No
+Aware of the following parameters: range
+Planner RRT specs:
+Multithreaded:                 No
+Reports approximate solutions: Yes
+Can optimize solutions:        No
+Aware of the following parameters: goal_bias range
+Planner BKPIECE1 specs:
+Multithreaded:                 No
+Reports approximate solutions: No
+Can optimize solutions:        No
+Aware of the following parameters: border_fraction failed_expansion_score_factor min_valid_path_fraction range
+Planner LBKPIECE1 specs:
+Multithreaded:                 No
+Reports approximate solutions: No
+Can optimize solutions:        No
+Aware of the following parameters: border_fraction min_valid_path_fraction range
+Planner KPIECE1 specs:
+Multithreaded:                 No
+Reports approximate solutions: Yes
+Can optimize solutions:        No
+Aware of the following parameters: border_fraction failed_expansion_score_factor goal_bias min_valid_path_fraction range
+Planner SBL specs:
+Multithreaded:                 No
+Reports approximate solutions: No
+Can optimize solutions:        No
+Aware of the following parameters: range
+Planner EST specs:
+Multithreaded:                 No
+Reports approximate solutions: Yes
+Can optimize solutions:        No
+Aware of the following parameters: goal_bias range
+Planner PRM specs:
+Multithreaded:                 Yes
+Reports approximate solutions: No
+Can optimize solutions:        Yes
+Aware of the following parameters: max_nearest_neighbors
+|>>>
+<<<|
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                4
+On-line CPU(s) list:   0-3
+Thread(s) per core:    1
+Core(s) per socket:    4
+Socket(s):             1
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 58
+Model name:            Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz
+Stepping:              9
+CPU MHz:               2494.316
+BogoMIPS:              4988.63
+Hypervisor vendor:     KVM
+Virtualization type:   full
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              3072K
+NUMA node0 CPU(s):     0-3
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc pni pclmulqdq ssse3 cx16 sse4_1 sse4_2 popcnt aes xsave avx rdrand hypervisor lahf_lm
+|>>>
+2820745068 is the random seed
+4 seconds per run
+1000 MB per run
+2 runs per planner
+22.0282 seconds spent to collect the data
+1 enum type
+status|Unknown status|Invalid start|Invalid goal|Unrecognized goal type|Timeout|Approximate solution|Exact solution|Crash|Unknown status
+8 planners
+geometric_RRTConnect
+7 common properties
+longest_valid_segment_fraction = 0.01
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 152; 153; 28.648438; 0.065166; 1; 1; 19.210086; 2314.977327; 76; 0.020064; 23.759278; -1.000000; 3263.841127; 31; 0.018849; 1; 6; 0.392521; 0.047011; 
+0; 1; 1; 189; 190; 28.648438; 0.072293; 1; 1; 17.318100; 2381.790770; 76; 0.030412; 17.679409; -1.000000; 3406.954956; 28; 0.009771; 1; 6; 0.333658; 0.072197; 
+.
+geometric_RRT
+8 common properties
+goal_bias = 0.050000000000000003
+longest_valid_segment_fraction = 0.01
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 166; 167; 28.648438; 0.065212; 1; 1; 17.490526; 2298.486160; 76; 0.039225; 22.207928; -1.000000; 2856.371202; 23; 0.004289; 1; 6; 0.248020; 0.053342; 
+0; 1; 1; 125; 126; 28.648438; 0.058973; 1; 1; 15.809095; 2326.621666; 68; 0.033814; 21.294335; -1.000000; 3074.195784; 28; 0.007882; 1; 6; 0.195448; 0.054206; 
+.
+geometric_BKPIECE1
+10 common properties
+border_fraction = 0.90000000000000002
+failed_expansion_score_factor = 0.5
+longest_valid_segment_fraction = 0.01
+min_valid_path_fraction = 0.5
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 734; 735; 28.648438; 0.073576; 1; 1; 20.003850; 2187.720538; 84; 0.033070; 23.972152; -1.000000; 7068.090599; 76; 0.043721; 1; 6; 0.990057; 0.426319; 
+0; 1; 1; 674; 675; 28.648438; 0.077101; 1; 1; 23.332672; 2771.826623; 56; 0.012848; 17.341289; -1.000000; 8388.037972; 84; 0.049076; 1; 6; 0.881023; 0.498459; 
+.
+geometric_LBKPIECE1
+9 common properties
+border_fraction = 0.90000000000000002
+longest_valid_segment_fraction = 0.01
+min_valid_path_fraction = 0.5
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 4682; 4683; 28.648438; 0.091282; 1; 1; 15.029245; 2299.774020; 80; 0.068519; 13.765742; -1.000000; 10706.165087; 125; 0.084576; 1; 6; 1.790311; 0.090560; 
+0; 1; 1; 7026; 7027; 28.648438; 0.099694; 1; 1; 21.486752; 2414.626260; 96; 0.080991; 13.424372; -1.000000; 8148.341524; 102; 0.086874; 1; 6; 2.287387; 0.073960; 
+.
+geometric_KPIECE1
+11 common properties
+border_fraction = 0.90000000000000002
+failed_expansion_score_factor = 0.5
+goal_bias = 0.050000000000000003
+longest_valid_segment_fraction = 0.01
+min_valid_path_fraction = 0.20000000000000001
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 1002; 1003; 28.648438; 0.066938; 1; 1; 21.964302; 2268.413202; 68; 0.017510; 13.375617; -1.000000; 6678.564306; 85; 0.076844; 1; 6; 0.759041; 0.147887; 
+0; 1; 1; 1268; 1269; 28.648438; 0.091495; 1; 1; 20.339978; 2391.998096; 88; 0.091789; 15.096357; -1.000000; 8182.973583; 99; 0.074801; 1; 6; 0.869365; 0.163957; 
+.
+geometric_SBL
+7 common properties
+longest_valid_segment_fraction = 0.01
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 7326; 7327; 28.648438; 0.076293; 1; 1; 15.755786; 2328.078787; 84; 0.022198; 20.899312; -1.000000; 4038.219585; 38; 0.017471; 1; 6; 3.326370; 0.295570; 
+0; 1; 1; 7044; 7045; 28.648438; 0.080810; 1; 1; 16.812343; 2120.902610; 80; 0.043882; 24.002299; -1.000000; 3703.780384; 38; 0.013729; 1; 6; 3.187139; 0.290982; 
+.
+geometric_EST
+8 common properties
+goal_bias = 0.5
+longest_valid_segment_fraction = 0.01
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+range = 229.88496394302612
+valid_segment_count_factor = 1
+22 properties for each run
+approximate solution BOOLEAN
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+graph motions INTEGER
+graph states INTEGER
+memory REAL
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 1; 1; 161; 162; 28.648438; 0.075364; 1; 1; 19.559570; 2347.593181; 120; 0.074121; 21.280645; -1.000000; 3500.278891; 27; 0.005865; 1; 6; 0.373761; 0.062793; 
+0; 1; 1; 346; 347; 28.648438; 0.071214; 1; 1; 19.576508; 2262.208269; 80; 0.038714; 17.977102; -1.000000; 3179.097054; 25; 0.006255; 1; 6; 0.993031; 0.049436; 
+.
+geometric_PRM
+7 common properties
+longest_valid_segment_fraction = 0.01
+max_nearest_neighbors = 
+projection.cellsize.0 = 35
+projection.cellsize.1 = 35
+projection.cellsize.2 = 35
+projection.cellsize_factor = 
+valid_segment_count_factor = 1
+26 properties for each run
+approximate solution BOOLEAN
+best cost REAL
+correct solution BOOLEAN
+correct solution strict BOOLEAN
+edge count INTEGER
+graph motions INTEGER
+graph states INTEGER
+iterations INTEGER
+memory REAL
+milestone count INTEGER
+simplification time REAL
+simplified correct solution BOOLEAN
+simplified correct solution strict BOOLEAN
+simplified solution clearance REAL
+simplified solution length REAL
+simplified solution segments INTEGER
+simplified solution smoothness REAL
+solution clearance REAL
+solution difference REAL
+solution length REAL
+solution segments INTEGER
+solution smoothness REAL
+solved BOOLEAN
+status ENUM
+time REAL
+valid segment fraction REAL
+2 runs
+0; 2534.575826; 1; 1; 250; 500; 86; 85; 28.648438; 87; 0.058237; 1; 1; 20.229834; 2198.548881; 72; 0.035561; 19.437446; -1.000000; 2534.575826; 17; 0.001417; 1; 6; 0.216996; 0.306748; 
+0; 2621.019852; 1; 1; 2197; 4394; 507; 329; 28.648438; 508; 0.079121; 1; 1; 20.545128; 2334.087234; 100; 0.062870; 21.380073; -1.000000; 2621.019852; 19; 0.002039; 1; 6; 1.441013; 0.542544; 
+5 progress properties for each run
+best cost REAL
+edge count INTEGER
+iterations INTEGER
+milestone count INTEGER
+time REAL
+2 runs
+inf,44,29,31,0.050395,;inf,108,50,52,0.100599,;inf,154,64,66,0.150996,;inf,236,83,85,0.201159,;
+inf,54,26,28,0.050291,;inf,94,38,40,0.101143,;inf,152,53,55,0.151377,;inf,296,80,82,0.201894,;inf,382,92,94,0.252288,;inf,441,102,104,0.302731,;inf,463,105,107,0.353333,;inf,516,113,115,0.403700,;inf,601,122,144,0.454450,;inf,689,134,185,0.504518,;inf,760,144,216,0.555333,;inf,818,152,236,0.605641,;inf,918,167,252,0.656415,;inf,1045,183,268,0.707258,;inf,1129,194,279,0.757569,;inf,1235,209,294,0.808050,;inf,1304,218,303,0.859252,;inf,1359,225,310,0.909533,;inf,1409,232,317,0.960241,;inf,1500,245,330,1.010501,;inf,1582,253,357,1.060552,;inf,1672,264,393,1.110704,;inf,1744,275,427,1.161270,;inf,1834,284,459,1.211399,;inf,1915,293,472,1.261634,;inf,1989,303,482,1.311704,;inf,2057,312,491,1.361987,;inf,2149,323,502,1.412303,;
+.
