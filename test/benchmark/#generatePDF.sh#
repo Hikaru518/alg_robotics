@@ -1,0 +1,5 @@
+#!/bin/bash
+# This script is to generate result pdf files for benchmark data.
+
+./ompl_benchmark_statistics.py ./data/uniform_sampler.log -d ./data/uniform_sampler.db
+./ompl_benchmark_statistics.py -d ./data/uniform_sampler.db -p ./results_pdf/results.pdf
