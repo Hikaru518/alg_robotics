@@ -12,7 +12,7 @@
 
 #include <omplapp/config.h>
 #include <omplapp/apps/SE3RigidBodyPlanning.h>
-#include <ompl/tools/benchmark/Benchmark.h>
+//#include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/kpiece/LBKPIECE1.h>
@@ -21,6 +21,9 @@
 #include <ompl/geometric/planners/sbl/SBL.h>
 #include <ompl/geometric/planners/est/EST.h>
 #include <ompl/geometric/planners/prm/PRM.h>
+
+#include "RTP.h"
+#include "Benchmark.h"
 
 #include <ompl/base/samplers/UniformValidStateSampler.h>
 #include <ompl/base/samplers/GaussianValidStateSampler.h>
@@ -57,9 +60,9 @@ void benchmark0(std::string& benchmark_name, app::SE3RigidBodyPlanning& setup,
     cs[0] = 35; cs[1] = 35; cs[2] = 35;
     setup.getStateSpace()->getDefaultProjection()->setCellSizes(cs);
 
-    runtime_limit = 4.0;
-    memory_limit  = 1000.0; // set high because memory usage is not always estimated correctly
-    run_count     = 2;
+    runtime_limit = 10.0;
+    memory_limit  = 10000.0; // set high because memory usage is not always estimated correctly
+    run_count     = 500;
 }
 
 void benchmark1(std::string& benchmark_name, app::SE3RigidBodyPlanning& setup,
@@ -138,6 +141,7 @@ int main(int argc, char **argv)
     //b.addPlanner(std::make_shared<geometric::SBL>(setup.getSpaceInformation()));
     b.addPlanner(std::make_shared<geometric::EST>(setup.getSpaceInformation()));
     b.addPlanner(std::make_shared<geometric::PRM>(setup.getSpaceInformation()));
+    b.addPlanner(std::make_shared<geometric::RTP>(setup.getSpaceInformation()));
 
     int sampler_id = argc > 2 ? ((argv[2][0] - '0') % 4) : -1;
 

@@ -9,9 +9,17 @@ from math import sin, cos
 def plotObstacles(ax):
     # Drawing the unit square
     # ax.add_patch(patches.Polygon([(-0.5,0.5),(-0.5,-0.5),(0.5,-0.5),(0.5,0.5)], fill=True, color='0.20'))
-    ax.add_patch(patches.Polygon([(-0.5,0),(-0.5,-0.5),(0,-0.5),(0,0)], fill=True, color='0.20'))
-    ax.add_patch(patches.Polygon([(-0.7,0.4),(-0.7,0.3),(0,0.3),(0,0.4)], fill=True, color='0.20'))
-    ax.add_patch(patches.Polygon([(0.4,0.4),(0.4,-1.2),(0.6,-1.2),(0.6,0.4)], fill=True, color='0.20'))
+    # ax.add_patch(patches.Polygon([(-0.7,2.0),(-0.7,0.0),(-0.6,0.0),(-0.6,2.0)], fill=True, color='0.20'))
+    # ax.add_patch(patches.Polygon([(-0.3,0.0),(-0.3,-2.0),(-0.2,-2.0),(-0.2,0.0)], fill=True, color='0.20'))
+    # ax.add_patch(patches.Polygon([(0.1,2.0),(0.1,0.0),(0.2,0.0),(0.2,2.0)], fill=True, color='0.20'))
+    # ax.add_patch(patches.Polygon([(0.5,0.0),(0.5,-2.0),(0.6,-2.0),(0.6,0.0)], fill=True, color='0.20'))
+
+    ax.add_patch(patches.Polygon([(-2.0,-1.2),(-2.0,-1.3),(0.9,-1.3),(0.9,-1.2)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(0.8,0.3),(0.8,-1.2),(0.9,-1.2),(0.9,0.3)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(0.0,0.4),(0.0,0.3),(0.9,0.3),(0.9,0.4)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(-0.9,1.3),(-0.9,1.2),(2.0,1.2),(2.0,1.3)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(-0.9,1.2),(-0.9,-0.3),(-0.8,-0.3),(-0.8,1.2)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(-0.9,-0.3),(-0.9,-0.4),(-0.0,-0.4),(-0.0,-0.3)], fill=True, color='0.20'))
 
 # Plot a path in R3 with a unit square obstacle centered at the origin
 def plotR2(path):
@@ -39,7 +47,7 @@ def plotSE2(path):
     ax.plot(X, Y)
 
     # Plotting the actual box
-    boxVert = [[-0.15, -0.15], [0.15, -0.15], [0.15, 0.15], [-0.15, 0.15], [-0.15, -0.15]]
+    boxVert = [[-0.05, -0.05], [0.05, -0.05], [0.05, 0.05], [-0.05, 0.05], [-0.05, -0.05]]
 
     for p in path:
         x = []

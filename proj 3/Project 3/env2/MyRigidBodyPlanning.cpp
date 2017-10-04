@@ -150,7 +150,7 @@ void planWithSimpleSetupR2(const std::vector<Rectangle>& obstacles)
 void planWithSimpleSetupSE2(const std::vector<Rectangle>& obstacles)
 {
     // Step 1) Create the state (configuration) space for your system
-    // In this instance, we will plan for a square of side length 0.3
+    // In this instance, we will plan for a square of side length 0.1
     // that both translates and rotates in the plane.
     // The state space can be easily composed of simpler state spaces
     ompl::base::StateSpacePtr se2;
@@ -180,7 +180,7 @@ void planWithSimpleSetupSE2(const std::vector<Rectangle>& obstacles)
     // valid configuration of the system or not.  For geometric planning, this
     // is a collision checker
 
-    // Note, we are "binding" the side length, 0.3, and the obstacles to the
+    // Note, we are "binding" the side length, 0.1, and the obstacles to the
     // state validity checker. The _1 notation is from std::placeholders and
     // indicates "the first argument" to the function pointer.
     ss.setStateValidityChecker(std::bind(isValidStateSquare, _1, 0.1, obstacles));
@@ -233,35 +233,6 @@ void planWithSimpleSetupSE2(const std::vector<Rectangle>& obstacles)
 
 int main(int, char **)
 {
-//    std::vector<Rectangle> obstacles;
-//    Rectangle obstacle;
-//    obstacle.x = -0.7;
-//    obstacle.y = 0.0;
-//    obstacle.width = 0.1;
-//    obstacle.height = 2.0;
-//    obstacles.push_back(obstacle);
-
-//    Rectangle obstacle2;
-//    obstacle2.x = -0.3;
-//    obstacle2.y = -2.0;
-//    obstacle2.width = 0.1;
-//    obstacle2.height = 2.0;
-//    obstacles.push_back(obstacle2);
-
-//    Rectangle obstacle3;
-//    obstacle3.x = 0.1;
-//    obstacle3.y = 0.0;
-//    obstacle3.width = 0.1;
-//    obstacle3.height = 2.0;
-//    obstacles.push_back(obstacle3);
-
-//    Rectangle obstacle4;
-//    obstacle4.x = 0.5;
-//    obstacle4.y = -2.0;
-//    obstacle4.width = 0.1;
-//    obstacle4.height = 2.0;
-//    obstacles.push_back(obstacle4);
-
     std::vector<Rectangle> obstacles;
     Rectangle obstacle;
     obstacle.x = -2.0;
