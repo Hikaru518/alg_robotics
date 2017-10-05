@@ -24,7 +24,7 @@ void ompl::geometric::RTP::clear()
     Planner::clear();
     sampler_.reset();
     freeMemory();
-    // to be modified
+
     if (nn_)
         nn_->clear();
     lastGoalMotion_ = nullptr;
@@ -36,7 +36,6 @@ void ompl::geometric::RTP::setup()
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
 
-    // to be modified
     if (!nn_)
         nn_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
     nn_->setDistanceFunction([this](const Motion *a, const Motion *b)
@@ -47,7 +46,7 @@ void ompl::geometric::RTP::setup()
 
 void ompl::geometric::RTP::freeMemory()
 {
-    // to be modified
+
     if (nn_)
     {
         std::vector<Motion *> motions;
@@ -103,22 +102,21 @@ ompl::base::PlannerStatus ompl::geometric::RTP::solve(const base::PlannerTermina
 
         /* sample random state in the tree */
         // Motion *nmotion = nn_->nearest(rmotion);
-
         // nn_ = std::make_shared<NN<Motion *>>();
 
         std::vector<Motion*> MotionVector;
         nn_->list(MotionVector);
         int N = MotionVector.size();
-        Motion *nmotion = MotionVector[round( rng_.uniform01()*(N-1) )];
+        Motion *nmotion = MotionVector[round( rng_.uniform01()*(N-1) )]; // randomly choose a tree node
         base::State *dstate = rstate;
 
         /* find state to add */
-        double d = si_->distance(nmotion->state, rstate);
-        if (d > maxDistance_)
-        {
-            si_->getStateSpace()->interpolate(nmotion->state, rstate, maxDistance_ / d, xstate);
-            dstate = xstate;
-        }
+        //double d = si_->distance(nmotion->state, rstate);
+        //if (d > maxDistance_)
+        //{
+        //    si_->getStateSpace()->interpolate(nmotion->state, rstate, maxDistance_ / d, xstate);
+        //    dstate = xstate;
+        //}
 
         if (si_->checkMotion(nmotion->state, dstate))
         {

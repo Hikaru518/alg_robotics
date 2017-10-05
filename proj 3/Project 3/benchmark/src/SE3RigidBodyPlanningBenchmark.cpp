@@ -12,7 +12,7 @@
 
 #include <omplapp/config.h>
 #include <omplapp/apps/SE3RigidBodyPlanning.h>
-//#include <ompl/tools/benchmark/Benchmark.h>
+#include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/kpiece/LBKPIECE1.h>
@@ -23,7 +23,7 @@
 #include <ompl/geometric/planners/prm/PRM.h>
 
 #include "RTP.h"
-#include "Benchmark.h"
+//#include "Benchmark.h"
 
 #include <ompl/base/samplers/UniformValidStateSampler.h>
 #include <ompl/base/samplers/GaussianValidStateSampler.h>
@@ -60,9 +60,9 @@ void benchmark0(std::string& benchmark_name, app::SE3RigidBodyPlanning& setup,
     cs[0] = 35; cs[1] = 35; cs[2] = 35;
     setup.getStateSpace()->getDefaultProjection()->setCellSizes(cs);
 
-    runtime_limit = 10.0;
+    runtime_limit = 50.0;
     memory_limit  = 10000.0; // set high because memory usage is not always estimated correctly
-    run_count     = 500;
+    run_count     = 100;
 }
 
 void benchmark1(std::string& benchmark_name, app::SE3RigidBodyPlanning& setup,
@@ -98,9 +98,9 @@ void benchmark1(std::string& benchmark_name, app::SE3RigidBodyPlanning& setup,
     setup.setStartAndGoalStates(start, goal);
     setup.getSpaceInformation()->setStateValidityCheckingResolution(0.01);
 
-    runtime_limit = 5.0;
+    runtime_limit = 50.0;
     memory_limit  = 1000.0; // set high because memory usage is not always estimated correctly
-    run_count     = 10;
+    run_count     = 100;
 }
 
 void preRunEvent(const base::PlannerPtr& /*planner*/)
@@ -155,7 +155,12 @@ int main(int argc, char **argv)
             });
         b.setExperimentName(benchmark_name + "_uniform_sampler");
         b.benchmark(request);
-        b.saveResultsToFile("./data/uniform_sampler.log");
+        if (benchmark_id == 0){
+            b.saveResultsToFile("./data/C_uniform_sampler.log");
+        }
+        if (benchmark_id == 1){
+            b.saveResultsToFile("./data/T_uniform_sampler.log");
+        }
     }
 
     if (sampler_id == 1 || sampler_id < 0)
