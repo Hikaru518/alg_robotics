@@ -32,8 +32,8 @@ def plotCar(path):
     fig.set_size_inches((width, height))
 
     # Drawing square obstacles
-    ax.add_patch(patches.Polygon([(-1.0,0.5),(-1.0,-0.5),(-0.25,-0.5),(-0.25,0.5)], fill=True, color='0.20'))
-    ax.add_patch(patches.Polygon([(1.0,0.5),(1.0,-0.5),(0.25,-0.5),(0.25,0.5)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(-1.0,0.5),(-1.0,-0.5),(0,-0.5),(0,0.5)], fill=True, color='0.20'))
+    ax.add_patch(patches.Polygon([(1.0,0.5),(1.0,-0.5),(0.5,-0.5),(0.5,0.5)], fill=True, color='0.20'))
 
     # Plotting the path (reference point)
     X = [p[0] for p in path]

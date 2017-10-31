@@ -64,8 +64,8 @@ const double square = 0.125;
 const double g = 9.81;
 
 // Pendulum Limits
-const double torque_limit = M_PI;
-const double pen_velocity_limit = 2*M_PI;
+const double torque_limit = 3;
+const double pen_velocity_limit = 10;
 
 // Car Limits
 const double turning_limit = M_PI / 2;
@@ -375,6 +375,7 @@ void planWithSimpleSetupPen(int plannertype, std::vector<Rect> obstacles, std::s
     // set the bounds for the control space
     ob::RealVectorBounds cbounds(1);
     cbounds.setLow(0);
+    //cbounds.setLow(-torque_limit);
     cbounds.setHigh(torque_limit);
     cspace->as<PenControlSpace>()->setBounds(cbounds);
 
@@ -400,6 +401,7 @@ void planWithSimpleSetupPen(int plannertype, std::vector<Rect> obstacles, std::s
     goal[1] = 0.0;
 
     /// set the start and goal states
+    //ss.setStartAndGoalStates(start, goal, 0.15);
     ss.setStartAndGoalStates(start, goal, 0.15);
 
     if(benchmark)
@@ -479,8 +481,10 @@ void planWithSimpleSetupCar(int plannertype, std::vector<Rect> obstacles, std::s
 
     ompl::base::StateSpacePtr r2(new ompl::base::RealVectorStateSpace(2));
     ompl::base::RealVectorBounds bounds(2);
-    bounds.setLow(-1);
-    bounds.setHigh(1);
+    //bounds.setLow(-1);
+    bounds.setLow(-5);
+    //bounds.setHigh(1);
+    bounds.setHigh(5);
     r2->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
 
     ompl::base::StateSpacePtr so2(new ompl::base::SO2StateSpace());
@@ -519,14 +523,18 @@ void planWithSimpleSetupCar(int plannertype, std::vector<Rect> obstacles, std::s
     /// create a start state
     ob::ScopedState<> start(space);
     start[0] = -0.75;
+    //start[0] = -4;
     start[1] = -0.75;
+    //start[1] = -5;
     start[2] = 0.0;
     start[3] = 0.0;
 
     /// create a  goal state; use the hard way to set the elements
     ob::ScopedState<> goal(space);
     goal[0] = 0.75;
+    //goal[0] = 4;
     goal[1] = 0.75;
+    //goal[1] = 5;
     goal[2] = 0.0;
     goal[3] = 0.0;
 
@@ -608,15 +616,16 @@ int main(int, char **)
     std::vector<Point2D> rect4;
 
     // Narrow Passage in-between two obstacles
+   
     rect3.push_back(std::make_pair(-1.0, -0.5));
-    rect3.push_back(std::make_pair(-0.25, -0.5));
-    rect3.push_back(std::make_pair(-0.25, 0.5));
+    rect3.push_back(std::make_pair(0, -0.5));
+    rect3.push_back(std::make_pair(0, 0.5));
     rect3.push_back(std::make_pair(-1.0, 0.5));
 
-    rect4.push_back(std::make_pair(0.25, -0.5));
+    rect4.push_back(std::make_pair(0.5, -0.5));
     rect4.push_back(std::make_pair(1.0, -0.5));
     rect4.push_back(std::make_pair(1.0, 0.5));
-    rect4.push_back(std::make_pair(0.25, 0.5));
+    rect4.push_back(std::make_pair(0.5, 0.5));
 
     narrow_obstacles.push_back(rect3);
     narrow_obstacles.push_back(rect4);
