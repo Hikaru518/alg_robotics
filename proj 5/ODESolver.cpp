@@ -43,7 +43,7 @@
 #include <iostream>
 #include <valarray>
 #include <limits>
-
+#include <fstream>
 
 // Add Eigen Library
 #include <Eigen/Dense>
@@ -81,32 +81,45 @@ void getXY(const std::vector<double> phi, std::vector<double> x, std::vector<dou
     }
 }
 
-/// gua you wen ti 
-MatrixXd getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int k){
-    MatrixXd tmpJL_dq(2,n);
-    double psi_ijk; 
-    for (int i = 0; i < n; ++i)
+// i,j,phi,JL
+MatrixXd getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int j){
+    MatrixXd tM(2,n);
+    MatrixXd tPsi(n,n);
+    tM = getJL_dqj(j,i,phi);
+    tPsi = tM.transpose()*JL[i]+JL[i].transpose()*tM;
+    return tPsi;
+}
+
+MatrixXd getJL_dqj(int j, int i, const std::vector<double> phi){
+    MatrixXd JL_dqj(2,n);
+    JL_dqj.setZero(2,n);
+    double r;
+    for (int a = 0; a < n; ++a)
     {
-        for (int j = 0; j < n; ++j)
+        r = max(a,j);
+        if (a<=i and a<=j)
         {
-            if (j==i)
-            {
-                tmpJL_dq(0,j) = -0.5*l[i]*cos(phi[i]);
-                tmpJL_dq(1,j) = -0.5*l[i]*sin(phi[i]);
-            }
-            if (j>i)
-            {
-                tmpJL_dq(0,j) = 0; tmpJL_dq(1,j) = 0;
-            }
-            if (j<i)
-            {
-                tmpJL_dq(0,j) = -x[j] + x[i] -0.5*l[i]*cos(phi[i]);
-                tmpJL_dq(1,j) = -y[j] + y[i] -0.5*l[i]*sin(phi[i]); 
-            }
+            JL_dqj(0,a) = -x[r] + x[i] - 0.5*l[i]*cos(phi[i]);    
+            JL_dqj(1,a) = -y[r] + y[i] - 0.5*l[i]*sin(phi[i]);
+        }
+        else
+        {
+            JL_dqj(0,a) = 0;
+            JL_dqj(1,a) = 0;
         }
     }
-    psi_ij = tmpJL_dq.transpose()*JL[i] + JL[i].transpose()*tmpJL_dq;
-    return psi_ij;
+    return JL_dqj;
+}
+
+MatrixXd expandtM(MatrixXd tM, MatrixXd Psi, MatrixXd q_dot, int j){
+    MatrixXd mat(1,n);
+    MatrixXd result = tM;
+    mat = q_dot.transpose()*Psi;
+    for (int i = 0; i < n; ++i)
+    {
+        result(j,i) = mat(0,i);
+    }
+    return result;
 }
 
 void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::StateType& q){
@@ -163,34 +176,24 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
         q_dot(i,1) = q[n+i];
     }
 
-    MatrixXd tmpM(n,1);
-    tmpM.setZero(n,1);
-    MatrixXd tmph(n,1);
-    tmph.setZero(n,1);
-    MatrixXd q_dotPsi(n,n);
-    q_dotPsi(n,n);
-    double psi_ij,m;
-
-/// gua
-    MatrixXd tmpM2(n,n);
+    MatrixXd sum2(n,1);
+    MatrixXd sum1(n,1);
+    sum2.setZero(n,1);
+    sum1.setZero(n,1);
+    MatrixXd tmpMatPsi(n,n);
+    MatrixXd tM(n,n);
     for (int i = 0; i < n; ++i)
     {
-        for (int j = 0; j < n; ++j)
+        tM.setZero(n,n);
+        for (int j = 0; j < n-1; ++j)
         {
-            tmpM2(i,j) = q_dot[j]*getPsi_ij(JL,phi,i,j);/// you wen ti
+            tmpMatPsi = getPsi_ij(i,j,phi,JL);
+            sum2 = sum2 + tmpMatPsi * q_dot(j,0);
+            tM = expandtM(tM, tmpMatPsi, q_dot, j);
         }
+        sum1 = sum1 + m[i]*((sum2*q_dot)-0.5*tM*q_dot);
     }
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < n; ++j)
-        {
-            psi_ij = getPsi_ij(JL,phi,i,j);
-            tmpM = tmpM + psi_ij * q_dot(j,0);
-        }
-        m = (1/12.0)*m[i]*l[i]*l[i];
-        tmph = tmph + m* ( (tmpM*q_dot) - 0.5*tmpM2*q_dot);
-    }
-    h = tmph;
+    h = sum1;
 }
 
 void setIdentity(MatrixXd m,int n){
@@ -264,7 +267,6 @@ void robotPostIntegration (const ob::State* /*state*/, const oc::Control* /*cont
     SO2.enforceBounds(result->as<ob::SE2StateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(1));
 }
 
-// Only Speed Limit!!!
 bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
 {
     //    ob::ScopedState<ob::SE2StateSpace>
@@ -295,6 +297,12 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
         }
     }
 
+    /// collision checking
+    /// check with itself
+    
+
+    /// check with environment
+
     // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
     return si->satisfiesBounds(state) && (const void*)rot != (const void*)pos;
 }
@@ -313,12 +321,29 @@ public:
 void planWithSimpleSetup()
 {
     /// construct the state space we are planning in
-    auto space(std::make_shared<ob::SE2StateSpace>());
+    //auto space(std::make_shared<ob::SE2StateSpace>());
+    ompl::base::StateSpacePtr space;
+    ompl::base::StateSpacePtr so2(new ompl::base::SO2StateSpace());
+    ompl::base::StateSpacePtr r(new ompl::base::RealVectorStateSpace(n));
+
+    ompl::base::RealVectorBounds velocity_limit(n);
+    velocity_limit.setLow(-pen_velocity_limit);
+    velocity_limit.setHigh(pen_velocity_limit);
+    r->as<ompl::base::RealVectorStateSpace>()->setBounds(velocity_limit);
+
+    // set state space
+    space = so2;
+    for (int i = 0; i < n-1; ++i)
+    {
+        ompl::base::StateSpacePtr so2(new ompl::base::SO2StateSpace());
+        space = space + so2;
+    }
+    space = so2 + r;
 
     /// set the bounds for the R^2 part of SE(2)
-    ob::RealVectorBounds bounds(2);
-    bounds.setLow(-1);
-    bounds.setHigh(1);
+    ob::RealVectorBounds bounds(n);
+    bounds.setLow(-10);
+    bounds.setHigh(10);
 
     space->setBounds(bounds);
 
@@ -326,9 +351,9 @@ void planWithSimpleSetup()
     auto cspace(std::make_shared<DemoControlSpace>(space));
 
     // set the bounds for the control space
-    ob::RealVectorBounds cbounds(2);
-    cbounds.setLow(-0.3);
-    cbounds.setHigh(0.3);
+    ob::RealVectorBounds cbounds(n);
+    cbounds.setLow(-10);
+    cbounds.setHigh(10);
 
     cspace->setBounds(cbounds);
 
@@ -346,29 +371,43 @@ void planWithSimpleSetup()
 
     // Use the ODESolver to propagate the system.  Call KinematicCarPostIntegration
     // when integration has finished to normalize the orientation values.
-    auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &KinematicCarODE));
-    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver, &KinematicCarPostIntegration));
+    auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &robotODE));
+    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver, &robotPostIntegration));
 
     /// create a start state
-    ob::ScopedState<ob::SE2StateSpace> start(space);
-    start->setX(-0.5);
-    start->setY(0.0);
-    start->setYaw(0.0);
-
+    ob::ScopedState<> start(space);
+    start[0] = 0.0;
+    start[1] = 0.0;
+    start[2] = 0.0;
+    start[3] = 0.0;
+    start[4] = 0.0;
+    start[5] = 0.0;
+    
     /// create a  goal state; use the hard way to set the elements
-    ob::ScopedState<ob::SE2StateSpace> goal(space);
-    goal->setX(0.0);
-    goal->setY(0.5);
-    goal->setYaw(0.0);
+    ob::ScopedState<> goal(space);
+    goal[0] = 3.14159;
+    goal[1] = 0.0;
+    goal[2] = 0.0;
+    goal[3] = 0.0;
+    goal[4] = 0.0;
+    goal[5] = 0.0;
 
     /// set the start and goal states
     ss.setStartAndGoalStates(start, goal, 0.05);
+
+    // planner 
+    ompl::base::PlannerPtr planner(new ompl::control::RRT(ss.getSpaceInformation()));
+    ss.setPlanner(planner);
 
     /// we want to have a reasonable value for the propagation step size
     ss.setup();
 
     /// attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(10.0);
+    ob::PlannerStatus solved = ss.solve(20.0);
+
+    std::ofstream fout("path.txt");
+    path.printAsMatrix(fout);
+    fout.close();
 
     if (solved)
     {
