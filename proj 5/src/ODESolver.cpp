@@ -62,8 +62,19 @@ const double g = 9.81;
 // setting limit;
 const double velocity_limit = 10;
 
+// define type
+typedef std::pair<double, double> Point2D;
+typedef std::vector<Point2D> Rect;
+
 namespace ob = ompl::base;
 namespace oc = ompl::control;
+using Eigen::MatrixXd;
+
+//lineIntersection
+bool lineIntersection(Point2D ours0, Point2D ours1, Point2D theirs0, Point2D theirs1)
+{
+    return true;
+}
 
 void getPhi(std::vector<double> phi, const oc::ODESolver::StateType& q){
     phi[0] = q[0];
@@ -267,6 +278,17 @@ void robotPostIntegration (const ob::State* /*state*/, const oc::Control* /*cont
     SO2.enforceBounds(result->as<ob::SE2StateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(1));
 }
 
+bool checkSelf(std::vector<Point2D> pts){
+    int N = pts.size();
+    for (int i = 0; i < N-1; ++i)
+    {
+        for (int j = 0; j < i; ++j)
+        {
+            lineIntersection(pts[i],pts[i+1],pts[j],pts[j+1])
+        }
+    }
+}
+
 bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
 {
     //    ob::ScopedState<ob::SE2StateSpace>
@@ -277,10 +299,10 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
     //const auto *se2state = state->as<ob::SE2StateSpace::StateType>();
 
     /// extract the first component of the state and cast it to what we expect
-    const auto *rot = c2state->as<ob::SO2StateSpace::StateType>(0);
+    const auto *rot = cstate->as<ob::SO2StateSpace::StateType>(0);
 
     /// extract the second component of the state and cast it to what we expect
-    const auto *vel = se2state->as<ob::RealVectorStateSpace::StateType>(1);
+    const auto *vel = cstate->as<ob::RealVectorStateSpace::StateType>(1);
 
     /// check validity of state defined by rotat & rot
     for (int i = 0; i < n; ++i)
@@ -298,13 +320,22 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
     }
 
     /// collision checking
-    /// check with itself
-    
+    /// store nodes
+    std::vector<Point2D> pts;
+    for (int i = 0; i < n; ++i)
+    {
+        pts.push_back(std::make_pair(x[i],y[i]));
+    }
+    if( checkSelf(pts) == false){
+        return false;
+    }
+    else if(/*checkObstacles*/ 1 ){
+        return true;
+    }
+    else{
+        return true;
+    }
 
-    /// check with environment
-
-    // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
-    return si->satisfiesBounds(state) && (const void*)rot != (const void*)pos;
 }
 
 /// @cond IGNORE
@@ -312,7 +343,7 @@ class DemoControlSpace : public oc::RealVectorControlSpace
 {
 public:
 
-    DemoControlSpace(const ob::StateSpacePtr &stateSpace) : oc::RealVectorControlSpace(stateSpace, 2)
+    DemoControlSpace(const ob::StateSpacePtr &stateSpace) : oc::RealVectorControlSpace(stateSpace, n)
     {
     }
 };
@@ -327,8 +358,8 @@ void planWithSimpleSetup()
     ompl::base::StateSpacePtr r(new ompl::base::RealVectorStateSpace(n));
 
     ompl::base::RealVectorBounds velocity_limit(n);
-    velocity_limit.setLow(-pen_velocity_limit);
-    velocity_limit.setHigh(pen_velocity_limit);
+    velocity_limit.setLow(-velocity_limit);
+    velocity_limit.setHigh(velocity_limit);
     r->as<ompl::base::RealVectorStateSpace>()->setBounds(velocity_limit);
 
     // set state space
@@ -338,9 +369,12 @@ void planWithSimpleSetup()
         ompl::base::StateSpacePtr so2(new ompl::base::SO2StateSpace());
         space = space + so2;
     }
-    space = so2 + r;
+    space = space + r;
 
-    /// set the bounds for the R^2 part of SE(2)
+    ////    space = r2 + so2 +  r;
+
+
+    /// set the bounds for the R^n part of SE(2)
     ob::RealVectorBounds bounds(n);
     bounds.setLow(-10);
     bounds.setHigh(10);
@@ -394,7 +428,7 @@ void planWithSimpleSetup()
 
     /// set the start and goal states
     ss.setStartAndGoalStates(start, goal, 0.05);
-
+    
     // planner 
     ompl::base::PlannerPtr planner(new ompl::control::RRT(ss.getSpaceInformation()));
     ss.setPlanner(planner);
