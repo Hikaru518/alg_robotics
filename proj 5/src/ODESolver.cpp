@@ -43,11 +43,14 @@
 #include <iostream>
 #include <valarray>
 #include <limits>
-
+#include <fstream>
+#include <ompl/control/planners/rrt/RRT.h>
 
 // Add Eigen Library
 #include <Eigen/Dense>
 #include <Eigen/LU>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 // Add other library
 #include <vector>
@@ -55,15 +58,27 @@
 
 // Setting parameters
 const int n = 3;
-std::vector<double> l(n+1);
-std::vector<double> m(n+1);
+std::vector<double> l(n);
+std::vector<double> m(n);
+std::vector<double> x(n),y(n);
 const double g = 9.81;
 
 // setting limit;
 const double velocity_limit = 10;
 
+// define type
+typedef std::pair<double, double> Point2D;
+typedef std::vector<Point2D> Rect;
+
 namespace ob = ompl::base;
 namespace oc = ompl::control;
+using Eigen::MatrixXd;
+
+//lineIntersection
+bool lineIntersection(Point2D ours0, Point2D ours1, Point2D theirs0, Point2D theirs1)
+{
+    return true;
+}
 
 void getPhi(std::vector<double> phi, const oc::ODESolver::StateType& q){
     phi[0] = q[0];
@@ -73,48 +88,73 @@ void getPhi(std::vector<double> phi, const oc::ODESolver::StateType& q){
 }
 
 void getXY(const std::vector<double> phi, std::vector<double> x, std::vector<double> y){
-    x[n] = 0; y[n]=0;
-    for (int i = n-1; i >= 0; i--)
+    x[n-1] = 0; y[n-1]=0;
+    for (int i = n-2; i >= 0; i--)
     {
         x[i] = x[i+1] + l[i]*cos(phi[i]);
         y[i] = y[i+1] + l[i]*sin(phi[i]);
     }
 }
 
-/// gua you wen ti 
-MatrixXd getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int k){
-    MatrixXd tmpJL_dq(2,n);
-    double psi_ijk; 
-    for (int i = 0; i < n; ++i)
+MatrixXd getJL_dqj(int j, int i, const std::vector<double> phi){
+    MatrixXd JL_dqj(2,n);
+    JL_dqj.setZero(2,n);
+    double r;
+    for (int a = 0; a < n; ++a)
     {
-        for (int j = 0; j < n; ++j)
+        r = (a>j?a:j);
+        r = (a >j? a:j);
+        if (a<=i and a<=j)
         {
-            if (j==i)
-            {
-                tmpJL_dq(0,j) = -0.5*l[i]*cos(phi[i]);
-                tmpJL_dq(1,j) = -0.5*l[i]*sin(phi[i]);
-            }
-            if (j>i)
-            {
-                tmpJL_dq(0,j) = 0; tmpJL_dq(1,j) = 0;
-            }
-            if (j<i)
-            {
-                tmpJL_dq(0,j) = -x[j] + x[i] -0.5*l[i]*cos(phi[i]);
-                tmpJL_dq(1,j) = -y[j] + y[i] -0.5*l[i]*sin(phi[i]); 
-            }
+            JL_dqj(0,a) = -x[r] + x[i] - 0.5*l[i]*cos(phi[i]);    
+            JL_dqj(1,a) = -y[r] + y[i] - 0.5*l[i]*sin(phi[i]);
+        }
+        else
+        {
+            JL_dqj(0,a) = 0;
+            JL_dqj(1,a) = 0;
         }
     }
-    psi_ij = tmpJL_dq.transpose()*JL[i] + JL[i].transpose()*tmpJL_dq;
-    return psi_ij;
+    return JL_dqj;
 }
 
-void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::StateType& q){
+MatrixXd getPsi_ij(std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int j){
+    MatrixXd tM(2,n);
+    MatrixXd tPsi(n,n);
+    tM = getJL_dqj(j,i,phi);
+    tPsi = tM.transpose()*JL[i]+JL[i].transpose()*tM;
+    return tPsi;
+}
+
+MatrixXd expandtM(MatrixXd tM, MatrixXd Psi, MatrixXd q_dot, int j,const std::vector<double> phi){
+    MatrixXd mat(1,n);
+    MatrixXd result = tM;
+    mat = q_dot.transpose()*Psi;
+    for (int i = 0; i < n; ++i)
+    {
+        result(j,i) = mat(0,i);
+    }
+    return result;
+}
+
+void setIdentity(MatrixXd m,int n){
+    for (int i = 0; i < n; ++i)
+    {
+        for (int j = 0; j <= i; ++j)
+        {
+            m(j,i) = 1;
+        }
+    }
+}
+
+void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESolver::StateType& q){
     ///int N = q.size() - 1;
     std::vector<MatrixXd> JL;
     std::vector<MatrixXd> JA;
     MatrixXd tmpJL(2,n);
 
+    std::cout << "define two vector MatrixXd" <<std::endl;
+    
     // Calculate JL
     for (int i = 0; i < n; ++i)
     {
@@ -137,6 +177,7 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
         }
         JL.push_back(tmpJL);
     }
+    std::cout << "Calculate JL"<<std::endl;
 
     // Calculate JA*I*JA
     MatrixXd tmpJA(n,n);
@@ -147,6 +188,7 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
         tmpJA = m[i]*l[i]*l[i]*(1/12.0)*tmpJA;
         JA.push_back(tmpJA);
     }
+    std::cout << "Calculate JA*I*JA"<<std::endl;
 
     // Calculate H
     H.setZero(n,n);
@@ -154,69 +196,66 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
     {
         H = H + m[i]*JL[i].transpose()*JL[i] + JA[i];        
     }
+    std::cout << "Calculate H"<<std::endl;
 
     // Calculate h
     // get q_dot
     MatrixXd q_dot(n,1);
     for (int i = 0; i < n; ++i)
     {
-        q_dot(i,1) = q[n+i];
+        q_dot(i,0) = q[n+i];
     }
+    std::cout << "Calculate h---part1"<<std::endl;
 
-    MatrixXd tmpM(n,1);
-    tmpM.setZero(n,1);
-    MatrixXd tmph(n,1);
-    tmph.setZero(n,1);
-    MatrixXd q_dotPsi(n,n);
-    q_dotPsi(n,n);
-    double psi_ij,m;
+    MatrixXd sum2(n,1);
+    MatrixXd sum1(n,1);
+    sum2.setZero(n,n);
+    sum1.setZero(n,1);
+    MatrixXd tmpMatPsi(n,n);
+    MatrixXd tM(n,n);
 
-/// gua
-    MatrixXd tmpM2(n,n);
     for (int i = 0; i < n; ++i)
     {
-        for (int j = 0; j < n; ++j)
+        tM.setZero(n,n);
+        for (int j = 0; j < n-1; ++j)
         {
-            tmpM2(i,j) = q_dot[j]*getPsi_ij(JL,phi,i,j);/// you wen ti
-        }
-    }
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < n; ++j)
-        {
-            psi_ij = getPsi_ij(JL,phi,i,j);
-            tmpM = tmpM + psi_ij * q_dot(j,0);
-        }
-        m = (1/12.0)*m[i]*l[i]*l[i];
-        tmph = tmph + m* ( (tmpM*q_dot) - 0.5*tmpM2*q_dot);
-    }
-    h = tmph;
-}
+            tmpMatPsi = getPsi_ij(JL,phi,i,j);
+	    std::cout << tmpMatPsi << std::endl;
+            std::cout << "q_dot" << std::endl;
+            std::cout << q_dot(j,0) << std::endl;
+            // Note !! Blow is the problematic line
+            sum2 = sum2 + tmpMatPsi * q_dot(j,0);
 
-void setIdentity(MatrixXd m,int n){
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j <= i; ++j)
-        {
-            m(j,i) = 1;
+            std::cout << "Calculate h ---- part2"<<std::endl;
+
+            tM = expandtM(tM, tmpMatPsi, q_dot, j,phi);
         }
+        sum1 = sum1 + m[i]*((sum2*q_dot)-0.5*tM*q_dot);
     }
+    h = sum1;
+        std::cout << "Calculate h ---- part3"<<std::endl;
 }
 
 // Definition of the ODE for the kinematic car.
 // This method is analogous to the above KinematicCarModel::ode function.
 void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc::ODESolver::StateType& qdot)
 {
+    std::cout <<"robotODE" << std::endl;
     const double *u = control->as<oc::RealVectorControlSpace::ControlType>()->values;
     const double s1 = q[0];
     const double s2 = q[1];
+    
     const double s3 = q[2];
     const double s_1 = q[3];
     const double s_2 = q[4];
     const double s_3 = q[5];
-    
-    vector<double> phi(n);
+    //const double s_1 = q[1];    
+
+    std::vector<double> phi(n);
     getPhi(phi,q);
+
+    std::cout<<"getPhi"<<std::endl;
+
 
     MatrixXd H(n,n);
     MatrixXd h(n,1);
@@ -224,10 +263,7 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
     MatrixXd t(n,1); // Torque;
     MatrixXd q_d2(n,1); //q_dot_dot
 
-    //for (int i = 0; i < n; ++i)
-    //{
-    //    q_d2(i,0) = q[n+i]; 
-    //}
+    std::cout << "defineMatrix"<<std::endl;
     
     double sum = 0;
     G(n-1,0) = g*m[n-1]*(0.5*l[n-1]*cos(phi[n-1]));
@@ -239,9 +275,12 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
         }
         G(i,0) = G(i+1) + g*(m[i]*(0.5*l[i])*cos(phi[i]) + sum);
     }
+    std::cout<<"calculate G"<<std::endl;
 
     get_h_H(H, h, phi, q);
     
+    std::cout <<"calculate h and H"<<std::endl;
+
     q_d2 = H.transpose()*(t - h - G);
 
     // Zero out qdot
@@ -250,10 +289,11 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
     qdot[0] = s_1;
     qdot[1] = s_2;
     qdot[2] = s_3;
-
-    qdot[3] = q_d2[0];
-    qdot[4] = q_d2[1];
-    qdot[5] = q_d2[2];
+    //qdot[1] = q_d2(0,0);
+    qdot[3] = q_d2(0,0);
+    qdot[4] = q_d2(1,0);
+    qdot[5] = q_d2(2,0);
+    std::cout <<"ODE____end" << std::endl;
 }
 
 // This is a callback method invoked after numerical integration.
@@ -264,9 +304,23 @@ void robotPostIntegration (const ob::State* /*state*/, const oc::Control* /*cont
     SO2.enforceBounds(result->as<ob::SE2StateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(1));
 }
 
-// Only Speed Limit!!!
+bool checkSelf(std::vector<Point2D> pts){
+    int N = pts.size();
+    for (int i = 0; i < N-1; ++i)
+    {
+        for (int j = 0; j < i; ++j)
+        {
+            //lineIntersection(pts[i],pts[i+1],pts[j],pts[j+1]);
+        }
+    }
+    return true;
+}
+
 bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
 {
+    return true;
+/*
+    std::cout << "isStateValid"<<std::endl;
     //    ob::ScopedState<ob::SE2StateSpace>
     /// cast the abstract state type to the type we expect
     const ompl::base::CompoundState* cstate;
@@ -275,19 +329,19 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
     //const auto *se2state = state->as<ob::SE2StateSpace::StateType>();
 
     /// extract the first component of the state and cast it to what we expect
-    const auto *rot = c2state->as<ob::SO2StateSpace::StateType>(0);
+    const auto *rot = cstate->as<ob::SO2StateSpace::StateType>(0);
 
     /// extract the second component of the state and cast it to what we expect
-    const auto *vel = se2state->as<ob::RealVectorStateSpace::StateType>(1);
+    const auto *vel = cstate->as<ob::RealVectorStateSpace::StateType>(1);
 
     /// check validity of state defined by rotat & rot
     for (int i = 0; i < n; ++i)
     {
-        if (vel[i] > velocity_limit)
+        if (vel->values[i] > velocity_limit)
         {
             return false;
         }
-        else if(vel[i] < - velocity_limit){
+        else if(vel->values[i] < - velocity_limit){
             return false;
         }
         else{
@@ -295,8 +349,24 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
         }
     }
 
-    // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
-    return si->satisfiesBounds(state) && (const void*)rot != (const void*)pos;
+    /// collision checking
+    /// store nodes
+    std::vector<Point2D> pts;
+    for (int i = 0; i < n; ++i)
+    {
+        pts.push_back(std::make_pair(x[i],y[i]));
+    }
+    if( checkSelf(pts) == false){
+        return false;
+    }
+    else if( 1 ){ ///check obstacles
+        return true;
+    }
+    else{
+        return true;
+    }
+*/
+
 }
 
 /// @cond IGNORE
@@ -304,7 +374,7 @@ class DemoControlSpace : public oc::RealVectorControlSpace
 {
 public:
 
-    DemoControlSpace(const ob::StateSpacePtr &stateSpace) : oc::RealVectorControlSpace(stateSpace, 2)
+    DemoControlSpace(const ob::StateSpacePtr &stateSpace) : oc::RealVectorControlSpace(stateSpace, n)
     {
     }
 };
@@ -313,22 +383,35 @@ public:
 void planWithSimpleSetup()
 {
     /// construct the state space we are planning in
-    auto space(std::make_shared<ob::SE2StateSpace>());
+    //auto space(std::make_shared<ob::SE2StateSpace>());
+    ompl::base::StateSpacePtr space;
+    //ompl::base::StateSpacePtr so2(new ompl::base::SO2StateSpace());
+    ompl::base::StateSpacePtr r2(new ompl::base::RealVectorStateSpace(n));
+    ompl::base::StateSpacePtr r(new ompl::base::RealVectorStateSpace(n));
 
-    /// set the bounds for the R^2 part of SE(2)
-    ob::RealVectorBounds bounds(2);
-    bounds.setLow(-1);
-    bounds.setHigh(1);
+    ompl::base::RealVectorBounds Bounds(n);
+    Bounds.setLow(-velocity_limit);
+    Bounds.setHigh(velocity_limit);
+    r->as<ompl::base::RealVectorStateSpace>()->setBounds(Bounds);
 
-    space->setBounds(bounds);
+    Bounds.setLow(0);
+    Bounds.setHigh(2*3.1415926);
+    r2->as<ompl::base::RealVectorStateSpace>()->setBounds(Bounds);
+
+    //std::cout <<"lalala" << std::endl;
+
+    // set state space
+    space = r2 + r;
+
+    //std::cout <<"lalala" << std::endl;
 
     // create a control space
     auto cspace(std::make_shared<DemoControlSpace>(space));
 
     // set the bounds for the control space
-    ob::RealVectorBounds cbounds(2);
-    cbounds.setLow(-0.3);
-    cbounds.setHigh(0.3);
+    ob::RealVectorBounds cbounds(n);
+    cbounds.setLow(-10);
+    cbounds.setHigh(10);
 
     cspace->setBounds(cbounds);
 
@@ -346,36 +429,57 @@ void planWithSimpleSetup()
 
     // Use the ODESolver to propagate the system.  Call KinematicCarPostIntegration
     // when integration has finished to normalize the orientation values.
-    auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &KinematicCarODE));
-    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver, &KinematicCarPostIntegration));
+    auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &robotODE));
+    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver, &robotPostIntegration));
+    ss.getSpaceInformation()->setPropagationStepSize(0.05);
+
+    std::cout <<"space Information" << std::endl;
 
     /// create a start state
-    ob::ScopedState<ob::SE2StateSpace> start(space);
-    start->setX(-0.5);
-    start->setY(0.0);
-    start->setYaw(0.0);
+    ob::ScopedState<> start(space);
+    start[0] = 0.0;
+    start[1] = 0.0;
+    start[2] = 0.0;
+    start[3] = 0.0;
+    start[4] = 0.0;
+    start[5] = 0.0;
+    
+    std::cout <<"start space" << std::endl;
 
     /// create a  goal state; use the hard way to set the elements
-    ob::ScopedState<ob::SE2StateSpace> goal(space);
-    goal->setX(0.0);
-    goal->setY(0.5);
-    goal->setYaw(0.0);
+    ob::ScopedState<> goal(space);
+    goal[0] = 3.14159;
+    goal[1] = 0.0;
+    goal[2] = 0.0;
+    goal[3] = 0.0;
+    goal[4] = 0.0;
+    goal[5] = 0.0;
 
     /// set the start and goal states
     ss.setStartAndGoalStates(start, goal, 0.05);
 
+    // planner 
+    ompl::base::PlannerPtr planner(new ompl::control::RRT(ss.getSpaceInformation()));
+    ss.setPlanner(planner);
+
     /// we want to have a reasonable value for the propagation step size
     ss.setup();
 
-    /// attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(10.0);
+    std::cout <<"setup" << std::endl;
 
+    /// attempt to solve the problem within one second of planning time
+    ob::PlannerStatus solved = ss.solve(20.0);
+
+    
     if (solved)
     {
         std::cout << "Found solution:" << std::endl;
+        ompl::control::PathControl& path = ss.getSolutionPath();
+        path.printAsMatrix(std::cout);
         /// print the path to screen
-
-        ss.getSolutionPath().asGeometric().printAsMatrix(std::cout);
+        std::ofstream fout("path.txt");
+        path.printAsMatrix(fout);
+        fout.close();
     }
     else
         std::cout << "No solution found" << std::endl;
@@ -389,7 +493,6 @@ int main(int /*argc*/, char ** /*argv*/)
     l[0] = 3;
     l[1] = 2;
     l[2] = 1;
-    l[3] = 0;
     m = l;
 
 
