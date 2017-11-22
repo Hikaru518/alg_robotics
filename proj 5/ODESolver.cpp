@@ -66,9 +66,8 @@ namespace ob = ompl::base;
 namespace oc = ompl::control;
 
 void getPhi(std::vector<double> phi, const oc::ODESolver::StateType& q){
-    int N = q.size() - 1;
     phi[0] = q[0];
-    for (int i = 1;i<N;i++){
+    for (int i = 1;i<n;i++){
         phi[i] = q[i] + phi[i-1];
     }
 }
@@ -82,9 +81,10 @@ void getXY(const std::vector<double> phi, std::vector<double> x, std::vector<dou
     }
 }
 
-double getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int j){
+/// gua you wen ti 
+MatrixXd getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, int i, int k){
     MatrixXd tmpJL_dq(2,n);
-    double phi_ij; 
+    double psi_ijk; 
     for (int i = 0; i < n; ++i)
     {
         for (int j = 0; j < n; ++j)
@@ -101,16 +101,16 @@ double getPsi_ij(const std::vector<MatrixXd> JL, const std::vector<double> phi, 
             if (j<i)
             {
                 tmpJL_dq(0,j) = -x[j] + x[i] -0.5*l[i]*cos(phi[i]);
-                tmpJL_dq(1,j) = -y[j] + y[2] -0.5*l[i]*sin(phi[i]); 
+                tmpJL_dq(1,j) = -y[j] + y[i] -0.5*l[i]*sin(phi[i]); 
             }
         }
     }
-    phi_ij = tmpJL_dq.transpose()*JL[i] + JL[i].transpose()*tmpJL_dq;
-    return phi_ij;
+    psi_ij = tmpJL_dq.transpose()*JL[i] + JL[i].transpose()*tmpJL_dq;
+    return psi_ij;
 }
 
 void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::StateType& q){
-    int N = q.size() - 1;
+    ///int N = q.size() - 1;
     std::vector<MatrixXd> JL;
     std::vector<MatrixXd> JA;
     MatrixXd tmpJL(2,n);
@@ -120,24 +120,20 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
     {
         for (int j = 0; j < n; ++j)
         {
-            if (j<i)
-            {
-                /* code */
                 if(j<i){
-                    tmpJL(0,j) = -y[i-1] + y[i] - 0.5*l[j]*sin(phi[i]);
-                    tmpJL(1,j) = x[i-1]  - x[i] + 0.5*l[j]*cos(phi[i]);
+                    tmpJL(0,j) = -y[j] + y[i] - 0.5*l[i]*sin(phi[i]);
+                    tmpJL(1,j) = x[j]  - x[i] + 0.5*l[i]*cos(phi[i]);
                 }
                 if (j == i)
                 {
-                    tmpJL(0,j) = -0.5*l[j]*sin(phi[i]);
-                    tmpJL(1,j) = 0.5*l[j]*cos(phi[i]);
+                    tmpJL(0,j) = -0.5*l[i]*sin(phi[i]);
+                    tmpJL(1,j) = 0.5*l[i]*cos(phi[i]);
                 }
                 if (j>i)
                 {
                     tmpJL(0,j) = 0;
                     tmpJL(1,j) = 0;
                 }
-            } 
         }
         JL.push_back(tmpJL);
     }
@@ -146,10 +142,10 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
     MatrixXd tmpJA(n,n);
     for (int i = 0; i < n; ++i)
     {
-        setIdentity(tmpJA,i);
-        tmpJA = m[i]*l[i]*l[i]*(1/12.0);
-        JA.push_back(tmpJA);
         tmpJA.setZero(n,n);
+        setIdentity(tmpJA,i);
+        tmpJA = m[i]*l[i]*l[i]*(1/12.0)*tmpJA;
+        JA.push_back(tmpJA);
     }
 
     // Calculate H
@@ -175,12 +171,13 @@ void get_h_H(MatrixXd H, MatrixXd h, vector<double> phi, const oc::ODESolver::St
     q_dotPsi(n,n);
     double psi_ij,m;
 
+/// gua
     MatrixXd tmpM2(n,n);
     for (int i = 0; i < n; ++i)
     {
         for (int j = 0; j < n; ++j)
         {
-            tmpM2(i,j) = q_dot[j]*getPsi_ij(JL,phi,i,j);
+            tmpM2(i,j) = q_dot[j]*getPsi_ij(JL,phi,i,j);/// you wen ti
         }
     }
     for (int i = 0; i < n; ++i)
@@ -227,15 +224,20 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
     MatrixXd t(n,1); // Torque;
     MatrixXd q_d2(n,1); //q_dot_dot
 
-    for (int i = 0; i < n; ++i)
-    {
-        q_d2(i,0) = q[n+i];
-    }
+    //for (int i = 0; i < n; ++i)
+    //{
+    //    q_d2(i,0) = q[n+i]; 
+    //}
     
     double sum = 0;
-    for (int i = n-1;i>=0;i--){
-        sum = m[i]*(0.5*l[i])*cos(phi[i]) + sum;
-        G(i,0) = g*m[i]*(0.5*l[i])*cos(phi[i]) + sum;
+    G(n-1,0) = g*m[n-1]*(0.5*l[n-1]*cos(phi[n-1]));
+    for (int i = n-2;i>=0;i--){
+        sum = 0;
+        for(int k = i; k<n;k++)
+        {
+            sum = sum + m[k]*l[i]*cos(phi[i]);
+        }
+        G(i,0) = G(i+1) + g*(m[i]*(0.5*l[i])*cos(phi[i]) + sum);
     }
 
     get_h_H(H, h, phi, q);
