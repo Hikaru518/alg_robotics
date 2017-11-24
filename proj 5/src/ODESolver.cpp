@@ -417,13 +417,14 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state )
         {
             for(int j = 0;j<pts.size();j++)
             {
-                bool intersection = isLineIntersect(pts[j],pts[j+1],r[i],r[(i+1)]);
+                bool intersection = isLineIntersect(pts[j],pts[j+1],r[i],r[(i+1) % r.size()]);
                 if(intersection){
                     return false;
                 }
             }
         }
     }
+    return true;
 
 
 }
