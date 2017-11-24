@@ -56,6 +56,8 @@
 #include <vector>
 #include <math.h>
 
+#include "isLineIntersect.h"
+
 // Setting parameters
 int n;
 std::vector<double> l;
@@ -73,6 +75,7 @@ typedef std::vector<Point2D> Rect;
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 using Eigen::MatrixXd;
+using namespace std::placeholders;
 
 //lineIntersection
 bool lineIntersection(Point2D ours0, Point2D ours1, Point2D theirs0, Point2D theirs1)
@@ -340,21 +343,25 @@ void robotPostIntegration (const ob::State* /*state*/, const oc::Control* /*cont
 
 bool checkSelf(std::vector<Point2D> pts){
     int N = pts.size();
+    bool result;
     for (int i = 0; i < N-1; ++i)
     {
         for (int j = 0; j < i; ++j)
         {
-            //lineIntersection(pts[i],pts[i+1],pts[j],pts[j+1]);
+            result = isLineIntersect(pts[i],pts[i+1],pts[j],pts[j+1]);
+            if(result == false){
+                return false;
+            }
         }
     }
     return true;
 }
 
-bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
+bool isStateValid(const oc::SpaceInformation *si, const ob::State *state )
 {
-    return true;
-/*
-    std::cout << "isStateValid"<<std::endl;
+
+
+    //std::cout << "isStateValid"<<std::endl;
     //    ob::ScopedState<ob::SE2StateSpace>
     /// cast the abstract state type to the type we expect
     const ompl::base::CompoundState* cstate;
@@ -363,7 +370,7 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
     //const auto *se2state = state->as<ob::SE2StateSpace::StateType>();
 
     /// extract the first component of the state and cast it to what we expect
-    const auto *rot = cstate->as<ob::SO2StateSpace::StateType>(0);
+    const auto *rot = cstate->as<ob::RealVectorStateSpace::StateType>(0);
 
     /// extract the second component of the state and cast it to what we expect
     const auto *vel = cstate->as<ob::RealVectorStateSpace::StateType>(1);
@@ -393,13 +400,31 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state)
     if( checkSelf(pts) == false){
         return false;
     }
-    else if( 1 ){ ///check obstacles
-        return true;
+    
+    //std::vector<std::vector<Rect>> obstacles;
+    std::vector<Rect> obstacles;
+    std::vector<Point2D> rect3,r;
+    rect3.push_back(std::make_pair(-0.5,-1.5));
+    rect3.push_back(std::make_pair(-0.5,-1.0));
+    rect3.push_back(std::make_pair(0.0,-1.0));
+    rect3.push_back(std::make_pair(0.0,-1.5));
+    obstacles.push_back(rect3);
+    //obstacles.push_back(narrow_obstacles);
+
+    for(int k = 0;k<obstacles.size();k++)
+    {
+        for(int i = 0;i <obstacles[k].size();i++)
+        {
+            for(int j = 0;j<pts.size();j++)
+            {
+                bool intersection = isLineIntersect(pts[j],pts[j+1],r[i],r[(i+1)]);
+                if(intersection){
+                    return false;
+                }
+            }
+        }
     }
-    else{
-        return true;
-    }
-*/
+
 
 }
 
@@ -457,6 +482,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     oc::SpaceInformation *si = ss.getSpaceInformation().get();
     ss.setStateValidityChecker(
         [si](const ob::State *state) { return isStateValid(si, state); });
+
 
     //std::cout <<"lalala" << std::endl;
 
@@ -519,6 +545,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
 
 int main(int /*argc*/, char ** /*argv*/)
 {
+
     n = 3;
     std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
     std::cout << "Please input n:";
