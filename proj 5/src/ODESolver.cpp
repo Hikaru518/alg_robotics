@@ -334,7 +334,8 @@ void robotPostIntegration (const ob::State* /*state*/, const oc::Control* /*cont
 {
     // Normalize orientation between 0 and 2*pi
     ob::SO2StateSpace SO2;
-    SO2.enforceBounds(result->as<ob::SE2StateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(1));
+    //SO2.enforceBounds(result->as<ob::SE2StateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(0));
+    SO2.enforceBounds(result->as<ob::CompoundState>()->as<ob::SO2StateSpace::StateType>(0));
 }
 
 bool checkSelf(std::vector<Point2D> pts){
@@ -421,6 +422,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     //ompl::base::StateSpacePtr r2(new ompl::base::SO2StateSpace());
     ompl::base::StateSpacePtr r2(new ompl::base::RealVectorStateSpace(n));
     ompl::base::StateSpacePtr r(new ompl::base::RealVectorStateSpace(n));
+    //ompl::base::StateSpacePtr r3(new ompl::base::SO2StateSpace());
 
     ompl::base::RealVectorBounds Bounds(n);
     Bounds.setLow(-velocity_limit);
@@ -430,13 +432,12 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     Bounds.setLow(-3.1415926);
     Bounds.setHigh(3.1415926);
     r2->as<ompl::base::RealVectorStateSpace>()->setBounds(Bounds);
-
+    
     //std::cout <<"lalala" << std::endl;
 
     // set state space
     
     space = r2 + r;
-
     //std::cout <<"lalala" << std::endl;
 
     // create a control space
@@ -457,6 +458,8 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     ss.setStateValidityChecker(
         [si](const ob::State *state) { return isStateValid(si, state); });
 
+    //std::cout <<"lalala" << std::endl;
+
     // Setting the propagation routine for this space:
     // KinematicCarModel does NOT use ODESolver
     //ss.setStatePropagator(std::make_shared<KinematicCarModel>(ss.getSpaceInformation()));
@@ -466,8 +469,9 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &robotODE));
     //ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver, &robotPostIntegration));
     ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver));
-    ss.getSpaceInformation()->setPropagationStepSize(0.15);
+    ss.getSpaceInformation()->setPropagationStepSize(0.05);
 
+    //std::cout <<"lalala" << std::endl;
 
     /// create a start state
     ob::ScopedState<> start(space);
@@ -484,7 +488,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     }
 
     /// set the start and goal states
-    ss.setStartAndGoalStates(start, goal, 0.15);
+    ss.setStartAndGoalStates(start, goal, 0.05);
 
     // planner 
     ompl::base::PlannerPtr planner(new ompl::control::RRT(ss.getSpaceInformation()));
@@ -496,7 +500,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     //std::cout <<"setup" << std::endl;
 
     /// attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(200.0);
+    ob::PlannerStatus solved = ss.solve(60.0);
 
     
     if (solved)
