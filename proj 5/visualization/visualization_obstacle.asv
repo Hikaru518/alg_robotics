@@ -1,0 +1,17 @@
+% 
+% clear all
+% clc
+%
+load('result3_Ob.mat');
+
+
+l1 = 0.9;
+l2 = 0.6;
+l3 = 0.3;
+
+xlist = [-0.5,-0.5,0,0,-0.5];
+ylist = [-1.5,-1.0,-1,-1.5,-1.5];
+
+plot(xlist,ylist,'-r','lineWidth',2);
+
+[x,y] = visualize_dynamics_manipulation(q1,q2,q3,l1,l2,l3);
