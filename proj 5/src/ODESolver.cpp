@@ -611,7 +611,7 @@ int main(int /*argc*/, char ** /*argv*/)
     std::cout << "Type 0 or 1:";
     std::cin >> envType;
 
-    std::cout << "Please input the time limit of RRT planner:" 
+    std::cout << "Please input the time limit of RRT planner:" ;
     std::cin >> time_limit;
 
     planWithSimpleSetup(v1, v2);
