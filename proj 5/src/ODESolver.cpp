@@ -64,6 +64,7 @@ int envType;
 std::vector<double> l;
 std::vector<double> m;
 std::vector<double> x(100),y(100);
+double time_limit;
 const double g = 9.81;
 
 // setting and torque limit;
@@ -532,7 +533,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     //std::cout <<"setup" << std::endl;
 
     /// attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(300.0);
+    ob::PlannerStatus solved = ss.solve(time_limit);
 
     
     if (solved)
@@ -551,6 +552,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
 
 int main(int /*argc*/, char ** /*argv*/)
 {
+
 
     n = 3;
     std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
@@ -608,6 +610,9 @@ int main(int /*argc*/, char ** /*argv*/)
     std::cout << "1): a environment with a square obstacle located in left lower plane." << std::endl;
     std::cout << "Type 0 or 1:";
     std::cin >> envType;
+
+    std::cout << "Please input the time limit of RRT planner:" 
+    std::cin >> time_limit;
 
     planWithSimpleSetup(v1, v2);
 
