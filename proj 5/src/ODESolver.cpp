@@ -360,7 +360,7 @@ bool checkSelf(std::vector<Point2D> pts){
     return true;
 }
 
-bool isStateValid(const oc::SpaceInformation *si, const ob::State *state )
+bool isStateValid(const oc::SpaceInformation *si,const ob::State *state )
 {
 
 
@@ -377,6 +377,19 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state )
 
     /// extract the second component of the state and cast it to what we expect
     const auto *vel = cstate->as<ob::RealVectorStateSpace::StateType>(1);
+
+    /// check validity of state defined by rotat & rot
+    for (int i = 0; i < n; ++i)
+    {
+        if (rot->values[i] > 3.1415926)
+        {
+            return false;
+        }
+        if (rot->values[i] < -3.1415926)
+        {
+            return false;
+        }
+    }
 
     /// check validity of state defined by rotat & rot
     for (int i = 0; i < n; ++i)
