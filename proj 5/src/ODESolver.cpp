@@ -60,13 +60,15 @@
 
 // Setting parameters
 int n;
+int envType;
 std::vector<double> l;
 std::vector<double> m;
 std::vector<double> x(100),y(100);
 const double g = 9.81;
 
-// setting limit;
-const double velocity_limit = 10;
+// setting and torque limit;
+double velocity_limit = 10;
+double t_limit = 100;
 
 // define type
 typedef std::pair<double, double> Point2D;
@@ -401,31 +403,34 @@ bool isStateValid(const oc::SpaceInformation *si, const ob::State *state )
         return false;
     }
     
-    //std::vector<std::vector<Rect>> obstacles;
-    std::vector<Rect> obstacles;
-    std::vector<Point2D> rect3,r;
-    rect3.push_back(std::make_pair(-0.5,-1.5));
-    rect3.push_back(std::make_pair(-0.5,-1.0));
-    rect3.push_back(std::make_pair(0.0,-1.0));
-    rect3.push_back(std::make_pair(0.0,-1.5));
-    obstacles.push_back(rect3);
-    //obstacles.push_back(narrow_obstacles);
+    if(envType == 1){
 
-    for(int k = 0;k<obstacles.size();k++)
-    {
-        for(int i = 0;i <obstacles[k].size();i++)
-        {
-            for(int j = 0;j<pts.size();j++)
-            {
-                bool intersection = isLineIntersect(pts[j],pts[j+1],r[i],r[(i+1) % r.size()]);
-                if(intersection){
-                    return false;
-                }
-            }
-        }
+	    //std::vector<std::vector<Rect>> obstacles;
+	    std::vector<Rect> obstacles;
+	    std::vector<Point2D> rect3,r;
+	    rect3.push_back(std::make_pair(-0.5,-1.5));
+	    rect3.push_back(std::make_pair(-0.5,-1.0));
+	    rect3.push_back(std::make_pair(0.0,-1.0));
+	    rect3.push_back(std::make_pair(0.0,-1.5));
+	    obstacles.push_back(rect3);
+	    //obstacles.push_back(narrow_obstacles);
+
+	    for(int k = 0;k<obstacles.size();k++)
+	    {
+		for(int i = 0;i <obstacles[k].size();i++)
+		{
+		    for(int j = 0;j<pts.size();j++)
+		    {
+		        bool intersection = isLineIntersect(pts[j],pts[j+1],r[i],r[(i+1) % r.size()]);
+		        if(intersection){
+		            return false;
+		        }
+		    }
+		}
+	    }
+
     }
     return true;
-
 
 }
 
@@ -471,8 +476,8 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
 
     // set the bounds for the control space
     ob::RealVectorBounds cbounds(n);
-    cbounds.setLow(-100);
-    cbounds.setHigh(100);
+    cbounds.setLow(-t_limit);
+    cbounds.setHigh(t_limit);
 
     cspace->setBounds(cbounds);
 
@@ -506,7 +511,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
         start[i] = v1[i];
     }
     
-    std::cout <<"start space" << std::endl;
+    //std::cout <<"start space" << std::endl;
 
     /// create a  goal state; use the hard way to set the elements
     ob::ScopedState<> goal(space);
@@ -527,7 +532,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     //std::cout <<"setup" << std::endl;
 
     /// attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(60.0);
+    ob::PlannerStatus solved = ss.solve(300.0);
 
     
     if (solved)
@@ -570,7 +575,7 @@ int main(int /*argc*/, char ** /*argv*/)
 
     //Input start state
     std::vector<double> v1(2*n);
-    std::cout << "Please input start state:" << std::endl;
+    std::cout << "Please input start state: (please input between -pi~pi)" << std::endl;
     for(int i = 0;i<n;i++){
         std::cout << "q[" << i+1 << "] = ";
         std::cin >> v1[i];
@@ -592,7 +597,19 @@ int main(int /*argc*/, char ** /*argv*/)
         std::cin >> v2[i];
     }
 
-    planWithSimpleSetup(v1,v2);
+    std::cout << "Please input velocity limit:" <<std::endl;
+    std::cin >> velocity_limit;
+
+    std::cout << "Please input torque limit:" << std::endl;
+    std::cin >> t_limit;
+
+    std::cout << "Please choose environment:" <<std::endl;
+    std::cout << "0): a free environment with no obstacles." << std::endl;
+    std::cout << "1): a environment with a square obstacle located in left lower plane." << std::endl;
+    std::cout << "Type 0 or 1:";
+    std::cin >> envType;
+
+    planWithSimpleSetup(v1, v2);
 
     return 0;
 }
