@@ -50,3 +50,31 @@ torque limit = 100
 time limit = 100
 note: it is not perfect in the end, however it is a approximate solution, as we can see, the planner is approaching the final state
 
+6 free space
+n=3
+length input 0.3, 0.6, 0.9
+start state 0, 0, 0, 0, 0, 0
+end state 3, 0, 0, 0, 0, 0
+velocity limit 10
+torque limit 100
+time limit 100
+
+7 free space
+n=3
+length input 0.3, 0.6, 0.9
+start state 0, 0, 0, 0, 0, 0
+end state 3, 0, 0, 0, 0, 0
+velocity limit 10
+torque limit 100
+time limit 200
+
+8 with obstacle
+n=3
+length input 0.3, 0.6, 0.9
+start state 0, 0, 0, 0, 0, 0
+end state 3, 0, 0, 0, 0, 0
+velocity limit 10
+torque limit 100
+time limit 200
+
+
