@@ -158,14 +158,6 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
     std::vector<MatrixXd> JL;
     std::vector<MatrixXd> JA;
     MatrixXd tmpJL(2,n);
-    //std::cout << l[n-1] << std::endl;
-    /*for(int i = 0;i < n; i++)
-    {
-        std::cout << "phi[" << i << "] = " << phi[i] << " ";
-    }
-    std::cout << endl;*/
-
-    //std::cout << "define two vector MatrixXd" <<std::endl;
     
     // Calculate JL
     for (int i = 0; i < n; ++i)
@@ -175,26 +167,20 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
                 if(j<i){
                     tmpJL(0,j) = -y[j] + y[i] - 0.5*l[i]*sin(phi[i]);
                     tmpJL(1,j) = x[j]  - x[i] + 0.5*l[i]*cos(phi[i]);
-                    //std::cout << "j<i" <<std::endl;
                 }
                 if (j == i)
                 {
                     tmpJL(0,j) = -0.5*l[i]*sin(phi[i]);
                     tmpJL(1,j) = 0.5*l[i]*cos(phi[i]);
-                    //std::cout << "j=i" <<std::endl;
                 }
                 if (j>i)
                 {
                     tmpJL(0,j) = 0;
                     tmpJL(1,j) = 0;
-                    //std::cout << "j>i" <<std::endl;
                 }
-                //std::cout << "finished: (" << i << "," << j<<")"<<std::endl; 
         }
         JL.push_back(tmpJL);
-        //std::cout << "pushed_back (" <<i<<")"<<std::endl;
     }
-    //std::cout << "Calculate JL"<< std::endl;
 
     // Calculate JA*I*JA
     MatrixXd tmpJA(n,n);
@@ -205,7 +191,6 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
         tmpJA = m[i]*l[i]*l[i]*(1/12.0)*tmpJA;
         JA.push_back(tmpJA);
     }
-    //std::cout << "Calculate JA*I*JA"<<std::endl;
 
     // Calculate H
     H.setZero(n,n);
@@ -213,7 +198,6 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
     {
         H = H + m[i]*JL[i].transpose()*JL[i] + JA[i];        
     }
-    //std::cout << "Calculate H"<<std::endl;
 
     // Calculate h
     // get q_dot
@@ -222,7 +206,6 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
     {
         q_dot(i,0) = q[n+i];
     }
-    //std::cout << "Calculate h---part1"<<std::endl;
 
     MatrixXd sum2(n,1);
     MatrixXd sum1(n,1);
@@ -237,20 +220,12 @@ void get_h_H(MatrixXd& H, MatrixXd& h, std::vector<double> phi, const oc::ODESol
         for (int j = 0; j < n-1; ++j)
         {
             tmpMatPsi = getPsi_ij(JL,phi,i,j);
-	    //std::cout << tmpMatPsi << std::endl;
-            //std::cout << "q_dot" << std::endl;
-            //std::cout << q_dot(j,0) << std::endl;
-            // Note !! Blow is the problematic line
             sum2 = sum2 + tmpMatPsi * q_dot(j,0);
-
-            //std::cout << "Calculate h ---- part2"<<std::endl;
-
             tM = expandtM(tM, tmpMatPsi, q_dot, j,phi);
         }
         sum1 = sum1 + m[i]*((sum2*q_dot)-0.5*tM*q_dot);
     }
     h = sum1;
-    //std::cout << "Calculate h ---- part3"<<std::endl;
 }
 
 // Definition of the ODE for the kinematic car.
@@ -266,17 +241,6 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
         s.push_back(q[i]);
         s_dot.push_back(q[i+n]);
     }
-    //std::cout<<"getState"<<std::endl;
-    /*
-    const double s1 = q[0];
-    const double s2 = q[1];
-    
-    const double s3 = q[2];
-    const double s_1 = q[3];
-    const double s_2 = q[4];
-    const double s_3 = q[5];
-    //const double s_1 = q[1];    
-    **/
 
     std::vector<double> phi(n);
     getPhi(phi,q);
@@ -292,7 +256,6 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
         t(i,0) = u[i];
     }
 
-    //std::cout << "defineMatrix"<<std::endl;
     
     double sum = 0;
     G(n-1,0) = g*m[n-1]*(0.5*l[n-1]*cos(phi[n-1]));
@@ -304,12 +267,10 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
         }
         G(i,0) = G(i+1) + g*(m[i]*(0.5*l[i])*cos(phi[i]) + sum);
     }
-    //std::cout<<"calculate G"<<std::endl;
-
+    
     get_h_H(H, h, phi, q);
     
-    //std::cout <<"calculate h and H"<<std::endl;
-
+    
     q_d2 = H.transpose()*(t - h - G);
 
     // Zero out qdot
@@ -320,19 +281,7 @@ void robotODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc
         qdot[i] = s_dot[i];
         qdot[n+i] = q_d2(i,0);
     }
-    //qdot[0] = q[1];
-    //qdot[1] = -g*cos(q[0]) + u[0];
     
-
-    /*qdot[0] = s_1;
-    qdot[1] = s_2;
-    qdot[2] = s_3;
-    //qdot[1] = q_d2(0,0);
-    qdot[3] = q_d2(0,0);
-    qdot[4] = q_d2(1,0);
-    qdot[5] = q_d2(2,0);*/
-
-    //std::cout <<"ODE____end" << std::endl;
 }
 
 // This is a callback method invoked after numerical integration.
@@ -364,14 +313,12 @@ bool isStateValid(const oc::SpaceInformation *si,const ob::State *state )
 {
 
 
-    //std::cout << "isStateValid"<<std::endl;
     //    ob::ScopedState<ob::SE2StateSpace>
     /// cast the abstract state type to the type we expect
     const ompl::base::CompoundState* cstate;
     cstate = state->as<ob::CompoundState>();
 
-    //const auto *se2state = state->as<ob::SE2StateSpace::StateType>();
-
+    
     /// extract the first component of the state and cast it to what we expect
     const auto *rot = cstate->as<ob::RealVectorStateSpace::StateType>(0);
 
@@ -419,7 +366,6 @@ bool isStateValid(const oc::SpaceInformation *si,const ob::State *state )
     
     if(envType == 1){
 
-	    //std::vector<std::vector<Rect>> obstacles;
 	    std::vector<Rect> obstacles;
 	    std::vector<Point2D> rect3,r;
 	    rect3.push_back(std::make_pair(-0.5,-1.5));
@@ -427,8 +373,7 @@ bool isStateValid(const oc::SpaceInformation *si,const ob::State *state )
 	    rect3.push_back(std::make_pair(0.0,-1.0));
 	    rect3.push_back(std::make_pair(0.0,-1.5));
 	    obstacles.push_back(rect3);
-	    //obstacles.push_back(narrow_obstacles);
-
+	
 	    for(int k = 0;k<obstacles.size();k++)
 	    {
 		for(int i = 0;i <obstacles[k].size();i++)
@@ -462,13 +407,10 @@ public:
 void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
 {
     /// construct the state space we are planning in
-    //auto space(std::make_shared<ob::SE2StateSpace>());
     ompl::base::StateSpacePtr space;
-    //ompl::base::StateSpacePtr r2(new ompl::base::SO2StateSpace());
     ompl::base::StateSpacePtr r2(new ompl::base::RealVectorStateSpace(n));
     ompl::base::StateSpacePtr r(new ompl::base::RealVectorStateSpace(n));
-    //ompl::base::StateSpacePtr r3(new ompl::base::SO2StateSpace());
-
+    
     ompl::base::RealVectorBounds Bounds(n);
     Bounds.setLow(-velocity_limit);
     Bounds.setHigh(velocity_limit);
@@ -478,13 +420,10 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     Bounds.setHigh(3.1415926);
     r2->as<ompl::base::RealVectorStateSpace>()->setBounds(Bounds);
     
-    //std::cout <<"lalala" << std::endl;
-
     // set state space
     
     space = r2 + r;
-    //std::cout <<"lalala" << std::endl;
-
+    
     // create a control space
     auto cspace(std::make_shared<DemoControlSpace>(space));
 
@@ -503,13 +442,6 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     ss.setStateValidityChecker(
         [si](const ob::State *state) { return isStateValid(si, state); });
 
-
-    //std::cout <<"lalala" << std::endl;
-
-    // Setting the propagation routine for this space:
-    // KinematicCarModel does NOT use ODESolver
-    //ss.setStatePropagator(std::make_shared<KinematicCarModel>(ss.getSpaceInformation()));
-
     // Use the ODESolver to propagate the system.  Call KinematicCarPostIntegration
     // when integration has finished to normalize the orientation values.
     auto odeSolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &robotODE));
@@ -517,16 +449,14 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     ss.setStatePropagator(oc::ODESolver::getStatePropagator(odeSolver));
     ss.getSpaceInformation()->setPropagationStepSize(0.05);
 
-    //std::cout <<"lalala" << std::endl;
-
+    
     /// create a start state
     ob::ScopedState<> start(space);
     for (int i = 0;i<2*n;i++){
         start[i] = v1[i];
     }
     
-    //std::cout <<"start space" << std::endl;
-
+    
     /// create a  goal state; use the hard way to set the elements
     ob::ScopedState<> goal(space);
     for (int i = 0;i<2*n;i++){
@@ -543,8 +473,7 @@ void planWithSimpleSetup(std::vector<double> v1, std::vector<double> v2)
     /// we want to have a reasonable value for the propagation step size
     ss.setup();
 
-    //std::cout <<"setup" << std::endl;
-
+    
     /// attempt to solve the problem within one second of planning time
     ob::PlannerStatus solved = ss.solve(time_limit);
 
