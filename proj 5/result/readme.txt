@@ -77,4 +77,12 @@ velocity limit 10
 torque limit 100
 time limit 200
 
-
+9.txt
+env:obstacle
+n = 3
+link length = 0.3,0.6,0.9
+start state = 0,0,0,0,0,0
+end state = 3,0,0,0,0,0
+velocity limit = 10
+torque limit = 100
+time limit = 200
