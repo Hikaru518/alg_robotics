@@ -1,14 +1,22 @@
 %% Nov. 21
+% 
+% clear all
+% clc
+% 
+% q1 = rand(1000,1);
+% q2 = rand(1000,1);
+q3 = zeros(19,1);
 
-clear all
-clc
+l1 = 1;
+l2 = 1;
+l3 = 0;
 
-q1 = rand(1000,1);
-q2 = rand(1000,1);
-q3 = rand(1000,1);
+%%
+xlist = [-0.5,-0.5,0,0,-0.5];
+ylist = [-1.5,-1.0,-1.0,-1.5,-1.5];
+plot(xlist,ylist,'-r','lineWidth',2);
 
-l1 = 0.5;
-l2 = 0.5;
-l3 = 0.5;
 
+%%
 [x,y] = visualize_dynamics_manipulation(q1,q2,q3,l1,l2,l3);
+

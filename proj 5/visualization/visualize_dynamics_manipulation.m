@@ -1,19 +1,32 @@
-function [x,y] = visualize_dynamics_manipulation(q1,q2,q3,l1,l2,l3)
-x = zeros(length(q1),4);
+function [x,y] = visualize_dynamics_manipulation(data,l,n)
+[a b] = size(data);
+
+x = zeros(a,n+1);
 y = zeros(size(x));
-phi1 = q1;
-phi2 = q1+q2;
-phi3 = q1+q2+q3;
-x(:,3) = l3*cos(phi3); % x3 
-y(:,3) = l3*sin(phi3); % y3
-x(:,2) = x(:,3)+l2*cos(phi2); % x2
-y(:,2) = y(:,3)+l2*sin(phi2); % y2
-x(:,1) = x(:,2)+l1*cos(phi1); % x1
-y(:,1) = y(:,2)+l1*sin(phi1); % y1
-for i = 1:length(q1)
-    line([x(i,1),x(i,2)],[y(i,1),y(i,2)])
-    line([x(i,2),x(i,3)],[y(i,2),y(i,3)])
-    line([x(i,3),x(i,4)],[y(i,3),y(i,4)])
-end
+phi = [];
+phi = [phi data(:,1)];
+for i = 2:n
+   phi = [phi,phi(:,i-1)+data(:,i)];
 end
 
+x(:,n+1) = 0*cos(phi(:,n));
+y(:,n+1) = 0*sin(phi(:,n));
+for i = n:-1:1
+    x(:,i) = x(:,i+1) + l(i)*cos(phi(:,i));
+    y(:,i) = y(:,i+1) + l(i)*sin(phi(:,i));
+end
+
+for i = 1:a
+    for j = 1:n
+        line([x(i,j),x(i,j+1)],[y(i,j),y(i,j+1)])
+        hold on;
+    end
+end
+x
+y
+
+x1 = x(:,1);
+y1 = y(:,1);
+for i = 1:(length(x1)-1)
+    line([x1(i),x1(i+1)],[y1(i),y1(i+1)],'Color','Green');
+end
